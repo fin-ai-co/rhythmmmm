@@ -49,6 +49,45 @@ const initialRituals: Ritual[] = [
   },
 ];
 
+const DELETE_THRESHOLD = -80;
+
+const SwipeToDelete = ({ children, onDelete }: { children: React.ReactNode; onDelete: () => void }) => {
+  const x = useMotionValue(0);
+  const bgOpacity = useTransform(x, [-120, -60, 0], [1, 0.8, 0]);
+  const iconScale = useTransform(x, [-100, -60, 0], [1.2, 1, 0.5]);
+
+  return (
+    <div className="relative overflow-hidden rounded-lg">
+      {/* Red background behind */}
+      <motion.div
+        className="absolute inset-0 bg-destructive flex items-center justify-end pr-6 rounded-lg"
+        style={{ opacity: bgOpacity }}
+      >
+        <motion.div style={{ scale: iconScale }} className="flex items-center gap-2 text-white">
+          <Trash2 className="w-5 h-5" />
+          <span className="text-sm font-medium">delete</span>
+        </motion.div>
+      </motion.div>
+
+      {/* Swipeable card */}
+      <motion.div
+        drag="x"
+        dragConstraints={{ left: -120, right: 0 }}
+        dragElastic={0.1}
+        style={{ x }}
+        onDragEnd={(_, info) => {
+          if (info.offset.x < DELETE_THRESHOLD) {
+            onDelete();
+          }
+        }}
+        className="relative z-10 cursor-grab active:cursor-grabbing"
+      >
+        {children}
+      </motion.div>
+    </div>
+  );
+};
+
 const RitualsView = () => {
   const [rituals, setRituals] = useState<Ritual[]>(initialRituals);
   const [expandedId, setExpandedId] = useState<string | null>("1");
