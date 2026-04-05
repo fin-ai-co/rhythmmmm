@@ -49,7 +49,7 @@ const SplashScreen = ({ onFinish }: { onFinish: () => void }) => {
           animate={{ opacity: phase === "text" || phase === "fade" ? 1 : 0, y: phase === "text" || phase === "fade" ? 0 : 12 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">rhythm.</h1>
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">discipline.</h1>
           <p className="text-xs text-muted-foreground mt-1.5 tracking-widest">consistency compounds</p>
         </motion.div>
       </motion.div>

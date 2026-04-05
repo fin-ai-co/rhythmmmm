@@ -64,7 +64,7 @@ const SettingsView = () => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `rhythm-export-${new Date().toISOString().split("T")[0]}.json`;
+      a.download = `discipline-export-${new Date().toISOString().split("T")[0]}.json`;
       a.click();
       URL.revokeObjectURL(url);
       toast({ title: "exported", description: "your data has been downloaded" });
@@ -201,7 +201,7 @@ const SettingsView = () => {
       </div>
 
       <p className="text-[10px] text-muted-foreground text-center pt-2">
-        rhythm. v1.0.0
+        discipline. v1.0.0
       </p>
     </div>
   );
