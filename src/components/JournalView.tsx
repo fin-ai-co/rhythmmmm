@@ -8,18 +8,38 @@ interface JournalEntry {
   mood: "peaceful" | "focused" | "struggling" | "energized";
 }
 
-const moodEmoji: Record<string, string> = {
-  peaceful: "🪷",
-  focused: "🎯",
-  struggling: "🌊",
-  energized: "⚡",
+const moodConfig: Record<string, { icon: string; label: string; gradient: string; glow: string }> = {
+  peaceful: {
+    icon: "☽",
+    label: "peaceful",
+    gradient: "from-blue-400/20 to-indigo-500/20",
+    glow: "shadow-[0_0_12px_hsl(213_94%_78%/0.3)]",
+  },
+  focused: {
+    icon: "◎",
+    label: "focused",
+    gradient: "from-amber-400/20 to-orange-500/20",
+    glow: "shadow-[0_0_12px_hsl(38_90%_60%/0.3)]",
+  },
+  struggling: {
+    icon: "∿",
+    label: "struggling",
+    gradient: "from-rose-400/20 to-red-500/20",
+    glow: "shadow-[0_0_12px_hsl(0_84%_60%/0.3)]",
+  },
+  energized: {
+    icon: "✦",
+    label: "energized",
+    gradient: "from-emerald-400/20 to-teal-500/20",
+    glow: "shadow-[0_0_12px_hsl(160_70%_50%/0.3)]",
+  },
 };
 
 const moodColors: Record<string, string> = {
   peaceful: "bg-primary/20 text-primary",
-  focused: "bg-accent/20 text-accent",
+  focused: "bg-amber-500/20 text-amber-400",
   struggling: "bg-destructive/20 text-destructive",
-  energized: "bg-streak/20 text-streak",
+  energized: "bg-emerald-500/20 text-emerald-400",
 };
 
 const initialEntries: JournalEntry[] = [
@@ -41,15 +61,6 @@ const initialEntries: JournalEntry[] = [
     text: "everything clicked today. all five habits done before noon. this is what momentum feels like.",
     mood: "energized",
   },
-];
-
-const stones = [
-  { size: 48, x: 20, y: 15, opacity: 0.9, color: "hsl(213 94% 78%)" },
-  { size: 32, x: 60, y: 25, opacity: 0.6, color: "hsl(213 80% 85%)" },
-  { size: 40, x: 40, y: 55, opacity: 0.8, color: "hsl(213 94% 78%)" },
-  { size: 24, x: 75, y: 60, opacity: 0.5, color: "hsl(213 70% 90%)" },
-  { size: 36, x: 30, y: 80, opacity: 0.7, color: "hsl(213 84% 82%)" },
-  { size: 28, x: 65, y: 85, opacity: 0.4, color: "hsl(213 60% 88%)" },
 ];
 
 const JournalView = () => {
@@ -92,8 +103,8 @@ const JournalView = () => {
     <div className="animate-fade-in space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-foreground mb-1">zen garden</h2>
-          <p className="text-xs text-muted-foreground">each stone reflects a day of discipline</p>
+          <h2 className="text-lg font-semibold text-foreground mb-1">journal</h2>
+          <p className="text-xs text-muted-foreground">reflect on your rhythm</p>
         </div>
         <button
           onClick={() => setIsWriting(!isWriting)}
@@ -103,39 +114,51 @@ const JournalView = () => {
         </button>
       </div>
 
-      {/* Zen Garden */}
-      <div className="relative bg-card rounded-lg border border-border h-36 overflow-hidden">
-        {stones.map((stone, i) => (
-          <div
-            key={i}
-            className="absolute rounded-full orb-pulse"
-            style={{
-              width: stone.size,
-              height: stone.size,
-              left: `${stone.x}%`,
-              top: `${stone.y}%`,
-              opacity: stone.opacity,
-              background: `radial-gradient(circle at 35% 35%, hsl(0 0% 100% / 0.15), ${stone.color})`,
-              animationDelay: `${i * 0.7}s`,
-              transform: "translate(-50%, -50%)",
-            }}
-          />
-        ))}
-        {/* Add stones for each entry */}
-        {entries.slice(0, 4).map((entry, i) => (
-          <div
-            key={entry.id}
-            className="absolute text-lg orb-pulse"
-            style={{
-              left: `${15 + i * 22}%`,
-              top: `${45 + (i % 2) * 20}%`,
-              animationDelay: `${i * 0.5}s`,
-              filter: "drop-shadow(0 0 8px hsl(213 94% 78% / 0.4))",
-            }}
-          >
-            {moodEmoji[entry.mood]}
+      {/* Mood landscape — ambient visualization */}
+      <div className="relative bg-card rounded-lg border border-border h-32 overflow-hidden">
+        {/* Background grain */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/3" />
+
+        {/* Ambient ripples based on entries */}
+        {entries.slice(0, 5).map((entry, i) => {
+          const config = moodConfig[entry.mood];
+          const x = 12 + i * 20;
+          const y = 30 + (i % 3) * 20;
+          return (
+            <div
+              key={entry.id}
+              className="absolute flex items-center justify-center"
+              style={{
+                left: `${x}%`,
+                top: `${y}%`,
+                transform: "translate(-50%, -50%)",
+              }}
+            >
+              {/* Outer glow ring */}
+              <div
+                className={`absolute w-14 h-14 rounded-full bg-gradient-to-br ${config.gradient} orb-pulse`}
+                style={{ animationDelay: `${i * 0.8}s` }}
+              />
+              {/* Inner symbol */}
+              <span
+                className="relative text-xl font-light text-foreground/70 orb-pulse"
+                style={{
+                  animationDelay: `${i * 0.8 + 0.2}s`,
+                  textShadow: "0 0 12px hsl(213 94% 78% / 0.4)",
+                }}
+              >
+                {config.icon}
+              </span>
+            </div>
+          );
+        })}
+
+        {/* No entries state */}
+        {entries.length === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <p className="text-xs text-muted-foreground/50">your reflections appear here</p>
           </div>
-        ))}
+        )}
       </div>
 
       {/* New Entry Form */}
@@ -145,18 +168,21 @@ const JournalView = () => {
 
           {/* Mood selector */}
           <div className="flex gap-2">
-            {(Object.keys(moodEmoji) as JournalEntry["mood"][]).map((mood) => (
-              <button
-                key={mood}
-                onClick={() => setSelectedMood(mood)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all duration-300 ${
-                  selectedMood === mood ? moodColors[mood] : "bg-muted text-muted-foreground"
-                }`}
-              >
-                <span>{moodEmoji[mood]}</span>
-                {mood}
-              </button>
-            ))}
+            {(Object.keys(moodConfig) as JournalEntry["mood"][]).map((mood) => {
+              const config = moodConfig[mood];
+              return (
+                <button
+                  key={mood}
+                  onClick={() => setSelectedMood(mood)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all duration-300 ${
+                    selectedMood === mood ? moodColors[mood] : "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  <span className="text-sm">{config.icon}</span>
+                  {config.label}
+                </button>
+              );
+            })}
           </div>
 
           <textarea
@@ -179,33 +205,38 @@ const JournalView = () => {
       {/* Past Entries */}
       <div className="space-y-2">
         <p className="text-xs text-muted-foreground font-medium">past reflections</p>
-        {entries.map((entry) => (
-          <button
-            key={entry.id}
-            onClick={() => setExpandedId(expandedId === entry.id ? null : entry.id)}
-            className="w-full text-left bg-card rounded-lg border border-border p-4 transition-all duration-300 hover:border-primary/30"
-          >
-            <div className="flex items-center justify-between mb-1">
-              <div className="flex items-center gap-2">
-                <span>{moodEmoji[entry.mood]}</span>
-                <span className="text-xs text-muted-foreground">{formatDate(entry.date)}</span>
+        {entries.map((entry) => {
+          const config = moodConfig[entry.mood];
+          return (
+            <button
+              key={entry.id}
+              onClick={() => setExpandedId(expandedId === entry.id ? null : entry.id)}
+              className="w-full text-left bg-card rounded-lg border border-border p-4 transition-all duration-300 hover:border-primary/30"
+            >
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-2">
+                  <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${moodColors[entry.mood]} ${config.glow}`}>
+                    {config.icon}
+                  </span>
+                  <span className="text-xs text-muted-foreground">{formatDate(entry.date)}</span>
+                </div>
+                {expandedId === entry.id ? (
+                  <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" />
+                ) : (
+                  <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+                )}
               </div>
               {expandedId === entry.id ? (
-                <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" />
+                <div className="animate-fade-in">
+                  <p className="text-[10px] text-muted-foreground mb-2">{formatFullDate(entry.date)}</p>
+                  <p className="text-sm text-foreground leading-relaxed">{entry.text}</p>
+                </div>
               ) : (
-                <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+                <p className="text-sm text-foreground/70 truncate">{entry.text}</p>
               )}
-            </div>
-            {expandedId === entry.id ? (
-              <div className="animate-fade-in">
-                <p className="text-[10px] text-muted-foreground mb-2">{formatFullDate(entry.date)}</p>
-                <p className="text-sm text-foreground leading-relaxed">{entry.text}</p>
-              </div>
-            ) : (
-              <p className="text-sm text-foreground/70 truncate">{entry.text}</p>
-            )}
-          </button>
-        ))}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
