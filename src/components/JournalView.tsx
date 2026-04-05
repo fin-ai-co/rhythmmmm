@@ -7,10 +7,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useHabits } from "@/hooks/useHabits";
 
 const moodOptions = [
-  { value: "on_fire", label: "on fire", dot: "bg-amber-400" },
-  { value: "steady", label: "steady", dot: "bg-emerald-400" },
-  { value: "meh", label: "meh", dot: "bg-blue-400" },
-  { value: "rough", label: "rough", dot: "bg-rose-400" },
+  { value: "energized", label: "energized", dot: "bg-amber-400" },
+  { value: "focused", label: "focused", dot: "bg-emerald-400" },
+  { value: "peaceful", label: "peaceful", dot: "bg-blue-400" },
+  { value: "struggling", label: "struggling", dot: "bg-rose-400" },
 ] as const;
 
 type MoodValue = (typeof moodOptions)[number]["value"];
