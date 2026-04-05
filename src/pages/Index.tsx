@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { Settings as SettingsIcon } from "lucide-react";
 import FocusOrb from "@/components/FocusOrb";
 import ProgressRing from "@/components/ProgressRing";
 import HabitRow from "@/components/HabitRow";
@@ -8,8 +9,9 @@ import AnalyticsView from "@/components/AnalyticsView";
 import GuideView from "@/components/GuideView";
 import JournalView from "@/components/JournalView";
 import SettingsView from "@/components/SettingsView";
+import RitualsView from "@/components/RitualsView";
 
-type Tab = "home" | "analytics" | "guide" | "journal" | "settings";
+type Tab = "home" | "analytics" | "rituals" | "guide" | "journal" | "settings";
 
 interface Habit {
   id: string;
@@ -50,9 +52,19 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <div className="max-w-md mx-auto px-5 pt-12 pb-28">
         {/* Header */}
-        <div className="mb-2 animate-fade-in">
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">discipline.</h1>
-          <p className="text-xs text-muted-foreground mt-1">{today}</p>
+        <div className="mb-2 animate-fade-in flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">discipline.</h1>
+            <p className="text-xs text-muted-foreground mt-1">{today}</p>
+          </div>
+          <button
+            onClick={() => setActiveTab("settings")}
+            className={`p-2 rounded-lg transition-all duration-300 ${
+              activeTab === "settings" ? "text-primary" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <SettingsIcon className="w-5 h-5" />
+          </button>
         </div>
 
         {activeTab === "home" && (
@@ -81,6 +93,7 @@ const Index = () => {
         )}
 
         {activeTab === "analytics" && <AnalyticsView />}
+        {activeTab === "rituals" && <RitualsView />}
         {activeTab === "guide" && <GuideView />}
         {activeTab === "journal" && <JournalView />}
         {activeTab === "settings" && <SettingsView />}
