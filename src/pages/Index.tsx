@@ -66,7 +66,7 @@ const Index = () => {
         {/* Header */}
         <div className="mb-6 page-transition flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">discipline.</h1>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">rhythm.</h1>
             <p className="text-[11px] text-muted-foreground mt-0.5 tracking-wide">{today}</p>
           </div>
           <button
