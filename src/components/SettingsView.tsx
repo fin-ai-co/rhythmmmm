@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { User, Bell, Moon, Shield, HelpCircle, LogOut } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const SettingsView = () => {
+  const { user, signOut } = useAuth();
   const [notifications, setNotifications] = useState(true);
   const [haptics, setHaptics] = useState(true);
   const [holdDuration, setHoldDuration] = useState("600");
@@ -19,7 +21,7 @@ const SettingsView = () => {
           <User className="w-5 h-5 text-primary" />
         </div>
         <div>
-          <p className="text-sm font-medium text-foreground">anonymous</p>
+          <p className="text-sm font-medium text-foreground">{user?.email ?? "anonymous"}</p>
           <p className="text-xs text-muted-foreground">free plan</p>
         </div>
       </div>
@@ -70,7 +72,7 @@ const SettingsView = () => {
       <div className="bg-card rounded-lg border border-border divide-y divide-border">
         <SettingLink icon={Shield} label="privacy policy" />
         <SettingLink icon={HelpCircle} label="help & support" />
-        <SettingLink icon={LogOut} label="sign out" destructive />
+        <SettingLink icon={LogOut} label="sign out" destructive onClick={signOut} />
       </div>
 
       <p className="text-[10px] text-muted-foreground text-center pt-2">
@@ -120,12 +122,14 @@ const SettingLink = ({
   icon: Icon,
   label,
   destructive,
+  onClick,
 }: {
   icon: typeof Shield;
   label: string;
   destructive?: boolean;
+  onClick?: () => void;
 }) => (
-  <button className="w-full flex items-center gap-3 p-4 text-left transition-colors hover:bg-muted/50">
+  <button onClick={onClick} className="w-full flex items-center gap-3 p-4 text-left transition-colors hover:bg-muted/50">
     <Icon className={`w-4 h-4 ${destructive ? "text-destructive" : "text-muted-foreground"}`} />
     <span className={`text-sm ${destructive ? "text-destructive" : "text-foreground"}`}>
       {label}
