@@ -217,6 +217,7 @@ export type Database = {
           id: string
           notifications_enabled: boolean
           theme: string
+          timezone: string
           updated_at: string
           user_id: string
         }
@@ -226,6 +227,7 @@ export type Database = {
           id?: string
           notifications_enabled?: boolean
           theme?: string
+          timezone?: string
           updated_at?: string
           user_id: string
         }
@@ -235,6 +237,7 @@ export type Database = {
           id?: string
           notifications_enabled?: boolean
           theme?: string
+          timezone?: string
           updated_at?: string
           user_id?: string
         }
