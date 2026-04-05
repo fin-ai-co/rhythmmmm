@@ -29,8 +29,10 @@ const Index = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showAddHabit, setShowAddHabit] = useState(false);
 
+  // Detect first-time user (no habits yet, just signed up)
   useEffect(() => {
     if (!isLoading && habits.length === 0 && user) {
+      // Check if user was created recently (within last 60 seconds)
       const createdAt = new Date(user.created_at).getTime();
       const now = Date.now();
       if (now - createdAt < 60_000) {
@@ -61,18 +63,18 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background scroll-container">
-      <div className="max-w-md mx-auto px-5 pt-14 pb-32">
+    <div className="min-h-screen bg-background">
+      <div className="max-w-md mx-auto px-5 pt-12 pb-28">
         {/* Header */}
-        <div className="mb-6 page-transition flex items-center justify-between">
+        <div className="mb-2 animate-fade-in flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-foreground tracking-tight">discipline.</h1>
-            <p className="text-[11px] text-muted-foreground mt-0.5 tracking-wide">{today}</p>
+            <p className="text-xs text-muted-foreground mt-1">{today}</p>
           </div>
           <button
             onClick={() => setActiveTab("settings")}
-            className={`p-2.5 rounded-2xl transition-all duration-300 touch-active ${
-              activeTab === "settings" ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground"
+            className={`p-2 rounded-lg transition-all duration-300 ${
+              activeTab === "settings" ? "text-primary" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             <SettingsIcon className="w-5 h-5" />
@@ -80,7 +82,7 @@ const Index = () => {
         </div>
 
         {activeTab === "home" && (
-          <div className="page-transition space-y-4">
+          <div className="animate-fade-in space-y-5">
             <div className="flex items-center justify-between">
               <FocusOrb progress={progress} />
               <ProgressRing progress={progress} />
@@ -100,11 +102,11 @@ const Index = () => {
 
             <div>
               <div className="flex items-center justify-between mb-3">
-                <p className="text-xs text-muted-foreground font-medium tracking-wide">today's habits</p>
+                <p className="text-xs text-muted-foreground font-medium">today's habits</p>
                 <div className="flex items-center gap-2">
                   {!isPremium && (
-                    <span className="text-[10px] text-muted-foreground tabular-nums">
-                      {habits.length}/{FREE_HABIT_LIMIT}
+                    <span className="text-[10px] text-muted-foreground">
+                      {habits.length}/{FREE_HABIT_LIMIT} free
                     </span>
                   )}
                   <button
@@ -115,7 +117,7 @@ const Index = () => {
                       }
                       setShowAddHabit(true);
                     }}
-                    className="p-1.5 rounded-xl text-primary hover:bg-primary/10 transition-all duration-300 touch-active"
+                    className="text-primary hover:text-primary/80 transition-colors"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
@@ -125,19 +127,15 @@ const Index = () => {
               {habits.length === 0 ? (
                 <button
                   onClick={() => setShowAddHabit(true)}
-                  className="w-full bg-card border border-dashed border-border/50 rounded-2xl p-10 text-center hover:border-primary/40 transition-all duration-300 touch-active"
+                  className="w-full bg-card border border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors"
                 >
                   <Plus className="w-6 h-6 text-muted-foreground mx-auto mb-2" />
                   <p className="text-sm text-muted-foreground">add your first habit</p>
                 </button>
               ) : (
-                <div className="space-y-2.5">
-                  {habits.map((habit, i) => (
-                    <div
-                      key={habit.id}
-                      className="group relative"
-                      style={{ animationDelay: `${i * 50}ms` }}
-                    >
+                <div className="space-y-2">
+                  {habits.map((habit) => (
+                    <div key={habit.id} className="group relative">
                       <HabitRow
                         name={habit.name}
                         streak={habit.streak}
@@ -147,7 +145,7 @@ const Index = () => {
                       />
                       <button
                         onClick={(e) => { e.stopPropagation(); deleteHabit(habit.id); }}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-200 pointer-events-auto z-10"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 p-1.5 text-muted-foreground hover:text-destructive transition-all"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -159,11 +157,11 @@ const Index = () => {
           </div>
         )}
 
-        {activeTab === "analytics" && <div className="page-transition"><AnalyticsView /></div>}
-        {activeTab === "rituals" && <div className="page-transition"><RitualsView /></div>}
-        {activeTab === "guide" && <div className="page-transition">{isPremium ? <GuideView /> : <PremiumGate feature="ai guide" />}</div>}
-        {activeTab === "journal" && <div className="page-transition"><JournalView /></div>}
-        {activeTab === "settings" && <div className="page-transition"><SettingsView /></div>}
+        {activeTab === "analytics" && <AnalyticsView />}
+        {activeTab === "rituals" && <RitualsView />}
+        {activeTab === "guide" && (isPremium ? <GuideView /> : <PremiumGate feature="ai guide" />)}
+        {activeTab === "journal" && <JournalView />}
+        {activeTab === "settings" && <SettingsView />}
       </div>
 
       <BottomNav active={activeTab} onChange={setActiveTab} />

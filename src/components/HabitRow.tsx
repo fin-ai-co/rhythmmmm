@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from "react";
-import { Flame, Check } from "lucide-react";
+import { Flame } from "lucide-react";
 
 interface HabitRowProps {
   name: string;
@@ -10,9 +10,9 @@ interface HabitRowProps {
 }
 
 const frictionColors: Record<string, string> = {
-  low: "bg-primary/15 text-primary/70",
-  medium: "bg-primary/25 text-primary/80",
-  heavy: "bg-primary/35 text-primary/90",
+  low: "bg-primary/20",
+  medium: "bg-primary/40",
+  heavy: "bg-primary/60",
 };
 
 const HabitRow = ({ name, streak, friction, completed, onComplete }: HabitRowProps) => {
@@ -50,10 +50,8 @@ const HabitRow = ({ name, streak, friction, completed, onComplete }: HabitRowPro
 
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl p-4 select-none cursor-pointer transition-all duration-300 ${
-        completed
-          ? "bg-primary/8 border border-primary/20"
-          : "bg-card border border-border/50 hover:border-primary/30 hover:shadow-[0_0_20px_hsl(213_94%_78%/0.08)]"
+      className={`relative overflow-hidden rounded-lg p-4 select-none cursor-pointer transition-all duration-300 border border-transparent hover:border-primary/30 hover:bg-primary/5 hover:shadow-[0_0_20px_hsl(213_94%_78%/0.12)] ${
+        completed ? "bg-primary/10" : "bg-card"
       }`}
       onMouseDown={startHold}
       onMouseUp={endHold}
@@ -64,7 +62,7 @@ const HabitRow = ({ name, streak, friction, completed, onComplete }: HabitRowPro
       {/* Ripple fill */}
       {holding && !completed && (
         <div
-          className="absolute inset-0 bg-primary/12 origin-left rounded-2xl"
+          className="absolute inset-0 bg-primary/15 origin-center rounded-lg"
           style={{
             transform: `scaleX(${fillProgress})`,
             transition: "transform 16ms linear",
@@ -75,42 +73,37 @@ const HabitRow = ({ name, streak, friction, completed, onComplete }: HabitRowPro
       <div className="relative flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div
-            className={`w-5 h-5 rounded-full flex items-center justify-center transition-all duration-500 ${
-              completed
-                ? "bg-primary scale-100"
-                : "border-2 border-muted-foreground/25"
+            className={`w-2 h-2 rounded-full transition-all duration-300 ${
+              completed ? "bg-primary scale-150" : "bg-muted-foreground/30"
+            }`}
+          />
+          <span
+            className={`text-sm font-medium transition-all duration-300 ${
+              completed ? "text-primary line-through opacity-60" : "text-foreground"
             }`}
           >
-            {completed && <Check className="w-3 h-3 text-primary-foreground" strokeWidth={3} />}
-          </div>
-          <div className="flex flex-col">
-            <span
-              className={`text-sm font-medium transition-all duration-300 ${
-                completed ? "text-primary/60 line-through" : "text-foreground"
-              }`}
-            >
-              {name}
-            </span>
-            {!completed && (
-              <span className="text-[10px] text-muted-foreground/50 mt-0.5">
-                hold to complete
-              </span>
-            )}
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${frictionColors[friction]}`}>
+            {name}
+          </span>
+          <span className={`text-[10px] px-2 py-0.5 rounded-full ${frictionColors[friction]} text-primary-foreground/70`}>
             {friction}
           </span>
+        </div>
+
+        <div className="flex items-center gap-1.5">
           {streak > 0 && (
-            <div className="flex items-center gap-1">
+            <>
               <Flame className="w-3.5 h-3.5 text-streak" />
-              <span className="text-xs font-semibold text-streak">{streak}</span>
-            </div>
+              <span className="text-xs font-medium text-streak">{streak}</span>
+            </>
           )}
         </div>
       </div>
+
+      {!completed && (
+        <p className="text-[10px] text-muted-foreground mt-1 ml-5 opacity-50">
+          hold to complete
+        </p>
+      )}
     </div>
   );
 };
