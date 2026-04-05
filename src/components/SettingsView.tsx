@@ -141,7 +141,7 @@ const SettingsView = () => {
             <p className="text-sm font-medium text-foreground">upgrade to premium</p>
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            unlimited habits, ai guide, and more. available as an in-app purchase.
+            $4.99/mo or $49.99/yr — unlimited habits, ai guide, and more.
           </p>
         </div>
       )}
