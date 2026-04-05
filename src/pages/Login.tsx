@@ -70,7 +70,7 @@ const Login = () => {
               }}
             />
           </div>
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">discipline.</h1>
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">rhythm.</h1>
           <p className="text-sm text-muted-foreground">build habits that last</p>
         </div>
 
