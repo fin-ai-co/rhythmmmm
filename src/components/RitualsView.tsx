@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link2, Sunrise, Moon, Zap, ChevronRight, Plus, X } from "lucide-react";
+import { Link2, Sunrise, Moon, Zap, ChevronRight, Plus, X, Trash2 } from "lucide-react";
 
 interface Ritual {
   id: string;
@@ -80,6 +80,11 @@ const RitualsView = () => {
           : r
       )
     );
+  };
+
+  const deleteRitual = (ritualId: string) => {
+    setRituals((prev) => prev.filter((r) => r.id !== ritualId));
+    if (expandedId === ritualId) setExpandedId(null);
   };
 
   const createRitual = () => {
@@ -304,13 +309,23 @@ const RitualsView = () => {
                   })}
 
                   {allDone && (
-                    <button
-                      onClick={() => resetRitual(ritual.id)}
-                      className="w-full py-2 text-xs text-muted-foreground hover:text-foreground transition-colors mt-2"
-                    >
-                      reset chain
-                    </button>
+                    <div className="flex items-center gap-2 mt-2">
+                      <button
+                        onClick={() => resetRitual(ritual.id)}
+                        className="flex-1 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        reset chain
+                      </button>
+                    </div>
                   )}
+
+                  <button
+                    onClick={() => deleteRitual(ritual.id)}
+                    className="w-full flex items-center justify-center gap-1.5 py-2 mt-1 text-xs text-muted-foreground/50 hover:text-destructive transition-colors duration-300"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    delete ritual
+                  </button>
                 </div>
               )}
             </div>
