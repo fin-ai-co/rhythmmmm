@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { Settings as SettingsIcon, Plus, Trash2 } from "lucide-react";
-import ShareStreak from "@/components/ShareStreak";
+
 import FocusOrb from "@/components/FocusOrb";
 import ProgressRing from "@/components/ProgressRing";
 import HabitRow from "@/components/HabitRow";
@@ -111,9 +111,6 @@ const Index = () => {
                   title={`${completedCount}/${habits.length} habits done today`}
                   progress={Math.round(progress * 100)}
                 />
-                <div className="flex justify-end">
-                  <ShareStreak habits={habits} completedCount={completedCount} />
-                </div>
               </>
             )}
 
