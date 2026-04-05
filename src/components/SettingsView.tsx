@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { User, Bell, Moon, Shield, HelpCircle, LogOut } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const SettingsView = () => {
+  const { user, signOut } = useAuth();
   const [notifications, setNotifications] = useState(true);
   const [haptics, setHaptics] = useState(true);
   const [holdDuration, setHoldDuration] = useState("600");
