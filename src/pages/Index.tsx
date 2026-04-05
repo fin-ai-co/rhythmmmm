@@ -16,6 +16,7 @@ import OnboardingView from "@/components/OnboardingView";
 import AddHabitDialog from "@/components/AddHabitDialog";
 import { useHabits } from "@/hooks/useHabits";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useStreakUpdater } from "@/hooks/useStreakUpdater";
 import { useAuth } from "@/contexts/AuthContext";
 import PremiumGate from "@/components/PremiumGate";
 
@@ -28,6 +29,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<Tab>("home");
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showAddHabit, setShowAddHabit] = useState(false);
+  useStreakUpdater();
 
   // Detect first-time user (no habits yet, just signed up)
   useEffect(() => {
