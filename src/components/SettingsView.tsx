@@ -201,7 +201,7 @@ const SettingsView = () => {
       </div>
 
       <p className="text-[10px] text-muted-foreground text-center pt-2">
-        discipline. v1.0.0
+        rhythm. v1.0.0
       </p>
     </div>
   );
