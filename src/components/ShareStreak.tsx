@@ -45,7 +45,7 @@ const ShareStreak = ({ habits, completedCount }: ShareStreakProps) => {
 
       ctx.fillStyle = "rgba(139, 192, 255, 0.4)";
       ctx.font = "600 14px system-ui, -apple-system, sans-serif";
-      ctx.fillText("discipline.", 40, 50);
+      ctx.fillText("rhythm.", 40, 50);
 
       ctx.fillStyle = "#8bc0ff";
       ctx.font = "700 72px system-ui, -apple-system, sans-serif";

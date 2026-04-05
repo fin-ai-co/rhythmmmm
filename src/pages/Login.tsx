@@ -73,7 +73,7 @@ const Login = () => {
     <div className="min-h-screen bg-background flex items-center justify-center px-5">
       <div className="w-full max-w-sm space-y-8 animate-fade-in">
         <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">discipline.</h1>
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">rhythm.</h1>
           <p className="text-sm text-muted-foreground">build habits that last</p>
         </div>
 
