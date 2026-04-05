@@ -96,12 +96,25 @@ const Index = () => {
             <div>
               <div className="flex items-center justify-between mb-3">
                 <p className="text-xs text-muted-foreground font-medium">today's habits</p>
-                <button
-                  onClick={() => setShowAddHabit(true)}
-                  className="text-primary hover:text-primary/80 transition-colors"
-                >
-                  <Plus className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-2">
+                  {!isPremium && (
+                    <span className="text-[10px] text-muted-foreground">
+                      {habits.length}/{FREE_HABIT_LIMIT} free
+                    </span>
+                  )}
+                  <button
+                    onClick={() => {
+                      if (!canAddHabit(habits.length)) {
+                        toast({ title: "upgrade required", description: `free plan allows ${FREE_HABIT_LIMIT} habits. upgrade to premium for unlimited.`, variant: "destructive" });
+                        return;
+                      }
+                      setShowAddHabit(true);
+                    }}
+                    className="text-primary hover:text-primary/80 transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
 
               {habits.length === 0 ? (
