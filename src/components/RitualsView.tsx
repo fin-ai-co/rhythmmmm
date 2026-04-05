@@ -356,16 +356,23 @@ const RitualsView = () => {
                       );
                     })}
 
-                    {allDone && (
-                      <div className="flex items-center gap-2 mt-2">
+                    <div className="flex items-center gap-2 mt-2">
+                      {allDone && (
                         <button
                           onClick={() => resetRitual(ritual.id)}
                           className="flex-1 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
                         >
                           reset chain
                         </button>
-                      </div>
-                    )}
+                      )}
+                      <button
+                        onClick={() => deleteRitual(ritual.id)}
+                        className="flex items-center gap-1 py-2 px-3 text-xs text-destructive hover:text-destructive/80 transition-colors"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        delete
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
