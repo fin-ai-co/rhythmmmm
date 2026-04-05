@@ -33,7 +33,7 @@ const Login = () => {
       if (error) {
         toast({ title: "Error", description: error.message, variant: "destructive" });
       } else {
-        navigate("/");
+        navigate("/app");
       }
     }
     setLoading(false);
@@ -50,7 +50,7 @@ const Login = () => {
       return;
     }
     if (result.redirected) return;
-    navigate("/");
+    navigate("/app");
     setLoading(false);
   };
 
@@ -65,7 +65,7 @@ const Login = () => {
       return;
     }
     if (result.redirected) return;
-    navigate("/");
+    navigate("/app");
     setLoading(false);
   };
 
