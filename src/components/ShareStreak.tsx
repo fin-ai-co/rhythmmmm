@@ -110,7 +110,7 @@ const ShareStreak = ({ habits, completedCount }: ShareStreakProps) => {
     setSharing(true);
     try {
       const blob = await generateImage();
-      const file = new File([blob], "discipline-streak.png", { type: "image/png" });
+      const file = new File([blob], "rhythm-streak.png", { type: "image/png" });
       const shareText = `${totalStreak} total streak days across ${habits.length} habits. consistency compounds.`;
 
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
@@ -121,7 +121,7 @@ const ShareStreak = ({ habits, completedCount }: ShareStreakProps) => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = "discipline-streak.png";
+        a.download = "rhythm-streak.png";
         a.click();
         URL.revokeObjectURL(url);
         toast({ title: "image downloaded", description: "share it wherever you like" });
