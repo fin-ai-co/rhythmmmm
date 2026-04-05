@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link2, Sunrise, Moon, Zap, ChevronRight, Plus, X } from "lucide-react";
+import { Link2, Sunrise, Moon, Zap, ChevronRight, Plus, X, Trash2 } from "lucide-react";
 
 interface Ritual {
   id: string;
