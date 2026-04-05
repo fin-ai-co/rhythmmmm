@@ -19,7 +19,7 @@ const BottomNav = ({ active, onChange }: { active: Tab; onChange: (tab: Tab) => 
             key={id}
             onClick={() => onChange(id)}
             className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all duration-300 ${
-              active === id ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              active === id ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-primary hover:bg-primary/5"
             }`}
           >
             <Icon className="w-5 h-5" strokeWidth={active === id ? 2.5 : 1.5} />
