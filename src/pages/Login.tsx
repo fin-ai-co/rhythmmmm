@@ -44,15 +44,27 @@ const Login = () => {
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
     });
-
     if (result.error) {
       toast({ title: "Error", description: String(result.error), variant: "destructive" });
       setLoading(false);
       return;
     }
-
     if (result.redirected) return;
+    navigate("/");
+    setLoading(false);
+  };
 
+  const handleAppleSignIn = async () => {
+    setLoading(true);
+    const result = await lovable.auth.signInWithOAuth("apple", {
+      redirect_uri: window.location.origin,
+    });
+    if (result.error) {
+      toast({ title: "Error", description: String(result.error), variant: "destructive" });
+      setLoading(false);
+      return;
+    }
+    if (result.redirected) return;
     navigate("/");
     setLoading(false);
   };
