@@ -121,7 +121,7 @@ const SettingsView = () => {
 
   const handleSendSupport = () => {
     if (!supportMessage.trim()) return;
-    const subject = encodeURIComponent(supportSubject.trim() || "discipline. — help request");
+    const subject = encodeURIComponent(supportSubject.trim() || "rhythm. — help request");
     const body = encodeURIComponent(
       `${supportMessage.trim()}\n\n---\nUser: ${user?.email ?? "unknown"}\nDate: ${new Date().toISOString()}`
     );
@@ -406,7 +406,7 @@ const SettingsView = () => {
       )}
 
       <p className="text-[10px] text-muted-foreground text-center pt-2">
-        discipline. v1.0.0
+        rhythm. v1.0.0
       </p>
     </div>
   );

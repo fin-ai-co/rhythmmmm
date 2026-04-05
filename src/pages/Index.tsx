@@ -85,7 +85,7 @@ const Index = () => {
         {/* Header */}
         <div className="mb-2 animate-fade-in flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">discipline.</h1>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">rhythm.</h1>
             <p className="text-xs text-muted-foreground mt-1">{today}</p>
           </div>
           <button
