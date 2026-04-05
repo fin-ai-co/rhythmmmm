@@ -23,7 +23,7 @@ const Privacy = () => {
             <section>
               <h2 className="text-base font-semibold text-foreground mb-2">1. information we collect</h2>
               <p>
-                when you use discipline, we collect information you provide directly — your email address,
+                when you use rhythm, we collect information you provide directly — your email address,
                 authentication credentials, and habit data you create within the app. we also collect usage
                 data such as habit completions, streaks, and journal entries to provide you with analytics
                 and insights.
