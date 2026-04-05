@@ -23,7 +23,7 @@ const Privacy = () => {
             <section>
               <h2 className="text-base font-semibold text-foreground mb-2">1. information we collect</h2>
               <p>
-                when you use discipline, we collect information you provide directly — your email address,
+                when you use rhythm, we collect information you provide directly — your email address,
                 authentication credentials, and habit data you create within the app. we also collect usage
                 data such as habit completions, streaks, and journal entries to provide you with analytics
                 and insights.
@@ -80,7 +80,7 @@ const Privacy = () => {
             <section>
               <h2 className="text-base font-semibold text-foreground mb-2">7. children's privacy</h2>
               <p>
-                discipline is not intended for children under 13. we do not knowingly collect personal
+                rhythm is not intended for children under 13. we do not knowingly collect personal
                 information from children under 13 years of age.
               </p>
             </section>
@@ -89,7 +89,7 @@ const Privacy = () => {
               <h2 className="text-base font-semibold text-foreground mb-2">8. changes to this policy</h2>
               <p>
                 we may update this privacy policy from time to time. we will notify you of any material
-                changes by posting the new policy within the app. your continued use of discipline after
+                changes by posting the new policy within the app. your continued use of rhythm after
                 changes constitutes acceptance of the updated policy.
               </p>
             </section>
