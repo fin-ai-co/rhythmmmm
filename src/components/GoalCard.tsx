@@ -1,6 +1,6 @@
 const GoalCard = ({ title, progress }: { title: string; progress: number }) => {
   return (
-    <div className="bg-card rounded-lg p-4 border border-border">
+    <div className="bg-card rounded-lg p-4 border border-border transition-all duration-300 hover:border-primary/20 hover:shadow-[0_0_16px_hsl(213_94%_78%/0.06)]">
       <p className="text-xs text-muted-foreground mb-2">long-run goal</p>
       <p className="text-sm font-medium text-foreground mb-3">{title}</p>
       <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
