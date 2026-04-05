@@ -28,11 +28,16 @@ const AddHabitDialog = ({ open, onClose, onAdd }: AddHabitDialogProps) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-background/80 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-md bg-card border-t border-border rounded-t-2xl p-6 space-y-5 animate-slide-up">
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div className="absolute inset-0 bg-background/60 glass" />
+      <div className="relative w-full max-w-md bg-card border-t border-border/50 rounded-t-3xl p-6 space-y-5 animate-slide-up safe-bottom">
+        <div className="w-10 h-1 bg-muted-foreground/20 rounded-full mx-auto -mt-1 mb-2" />
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold text-foreground">new habit</h3>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+          <button onClick={onClose} className="p-1.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-all touch-active">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -42,7 +47,7 @@ const AddHabitDialog = ({ open, onClose, onAdd }: AddHabitDialogProps) => {
             placeholder="e.g. meditate 10 min"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="h-12 bg-muted border-border"
+            className="h-12 bg-muted border-border/50 rounded-xl"
             autoFocus
           />
 
@@ -54,9 +59,9 @@ const AddHabitDialog = ({ open, onClose, onAdd }: AddHabitDialogProps) => {
                   key={f}
                   type="button"
                   onClick={() => setFriction(f)}
-                  className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-300 ${
+                  className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-medium transition-all duration-300 touch-active ${
                     friction === f
-                      ? "bg-primary text-primary-foreground"
+                      ? "bg-primary text-primary-foreground shadow-[0_0_16px_hsl(213_94%_78%/0.2)]"
                       : "bg-muted text-muted-foreground hover:bg-muted/80"
                   }`}
                 >
@@ -66,7 +71,7 @@ const AddHabitDialog = ({ open, onClose, onAdd }: AddHabitDialogProps) => {
             </div>
           </div>
 
-          <Button type="submit" disabled={loading || !name.trim()} className="w-full h-12">
+          <Button type="submit" disabled={loading || !name.trim()} className="w-full h-12 rounded-xl text-sm font-semibold">
             <Plus className="w-4 h-4 mr-2" />
             add habit
           </Button>
