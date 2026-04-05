@@ -1,4 +1,5 @@
 import { useState } from "react";
+import SubscriptionPaywall from "@/components/SubscriptionPaywall";
 import {
   User,
   Bell,
@@ -33,6 +34,7 @@ const SettingsView = () => {
   const [showSupport, setShowSupport] = useState(false);
   const [supportSubject, setSupportSubject] = useState("");
   const [supportMessage, setSupportMessage] = useState("");
+  const [showUpgrade, setShowUpgrade] = useState(false);
 
   const handleResetStreaks = async () => {
     if (!resetConfirm) {
@@ -135,7 +137,10 @@ const SettingsView = () => {
 
       {/* Upgrade banner for free users */}
       {!isPremium && (
-        <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/20 p-4 space-y-2">
+        <button
+          onClick={() => setShowUpgrade(true)}
+          className="w-full bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/20 p-4 space-y-2 text-left hover:border-primary/40 transition-all"
+        >
           <div className="flex items-center gap-2">
             <Crown className="w-4 h-4 text-primary" />
             <p className="text-sm font-medium text-foreground">upgrade to premium</p>
@@ -143,7 +148,7 @@ const SettingsView = () => {
           <p className="text-xs text-muted-foreground leading-relaxed">
             $4.99/mo or $49.99/yr — unlimited habits, ai guide, and more.
           </p>
-        </div>
+        </button>
       )}
 
       {/* Notifications & Haptics */}
@@ -273,6 +278,16 @@ const SettingsView = () => {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Upgrade Paywall */}
+      {showUpgrade && (
+        <SubscriptionPaywall
+          trialDaysLeft={trialDaysLeft}
+          isTrialExpired={!hasAccess}
+          forceLock={false}
+          onDismiss={() => setShowUpgrade(false)}
+        />
       )}
 
       <p className="text-[10px] text-muted-foreground text-center pt-2">
