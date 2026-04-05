@@ -6,10 +6,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useHabits } from "@/hooks/useHabits";
 
 const moodOptions = [
-  { value: "on_fire", icon: "🔥", label: "on fire" },
-  { value: "steady", icon: "⚡", label: "steady" },
-  { value: "meh", icon: "☁️", label: "meh" },
-  { value: "rough", icon: "🌊", label: "rough" },
+  { value: "on_fire", label: "on fire", dot: "bg-amber-400" },
+  { value: "steady", label: "steady", dot: "bg-emerald-400" },
+  { value: "meh", label: "meh", dot: "bg-blue-400" },
+  { value: "rough", label: "rough", dot: "bg-rose-400" },
 ] as const;
 
 type MoodValue = (typeof moodOptions)[number]["value"];
@@ -154,6 +154,13 @@ const JournalView = () => {
   const getMoodConfig = (mood: string) =>
     moodOptions.find((m) => m.value === mood) ?? moodOptions[1];
 
+  const moodDotMap: Record<string, string> = {
+    on_fire: "bg-amber-400",
+    steady: "bg-emerald-400",
+    meh: "bg-blue-400",
+    rough: "bg-rose-400",
+  };
+
   // Mood timeline — last 7 entries
   const moodTimeline = entries.slice(0, 7).reverse();
 
@@ -226,7 +233,7 @@ const JournalView = () => {
                     : "border-transparent bg-muted text-muted-foreground"
                 }`}
               >
-                <span>{mood.icon}</span>
+                <span className={`w-2 h-2 rounded-full ${mood.dot}`} />
                 {mood.label}
               </button>
             ))}
@@ -276,7 +283,7 @@ const JournalView = () => {
               };
               return (
                 <div key={entry.id} className="flex-1 flex flex-col items-center gap-1">
-                  <span className="text-xs">{config.icon}</span>
+                  <span className={`w-2 h-2 rounded-full ${moodDotMap[entry.mood] ?? "bg-muted"}`} />
                   <div
                     className={`w-full rounded-t-sm ${heights[entry.mood] ?? "h-6"} transition-all duration-500`}
                     style={{
@@ -318,7 +325,7 @@ const JournalView = () => {
                 >
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm">{config.icon}</span>
+                      <span className={`w-2.5 h-2.5 rounded-full ${moodDotMap[entry.mood] ?? "bg-muted"}`} />
                       <span className="text-xs text-muted-foreground">
                         {formatDate(entry.created_at)}
                       </span>
