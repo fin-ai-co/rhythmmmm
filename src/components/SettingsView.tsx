@@ -166,7 +166,7 @@ const SettingsView = () => {
             <div className="flex items-center gap-2">
               <div className="min-w-0">
                 <p className="text-sm font-medium text-foreground truncate">
-                  {displayName || user?.email ?? "anonymous"}
+                  {displayName || (user?.email ?? "anonymous")}
                 </p>
                 {displayName && (
                   <p className="text-[10px] text-muted-foreground truncate">{user?.email}</p>
