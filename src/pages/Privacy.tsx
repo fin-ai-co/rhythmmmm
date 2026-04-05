@@ -80,7 +80,7 @@ const Privacy = () => {
             <section>
               <h2 className="text-base font-semibold text-foreground mb-2">7. children's privacy</h2>
               <p>
-                discipline is not intended for children under 13. we do not knowingly collect personal
+                rhythm is not intended for children under 13. we do not knowingly collect personal
                 information from children under 13 years of age.
               </p>
             </section>
