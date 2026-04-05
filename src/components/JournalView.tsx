@@ -76,7 +76,7 @@ const JournalView = () => {
   const { habits, completedIds } = useHabits();
   const [isWriting, setIsWriting] = useState(false);
   const [newText, setNewText] = useState("");
-  const [selectedMood, setSelectedMood] = useState<MoodValue>("steady");
+  const [selectedMood, setSelectedMood] = useState<MoodValue>("peaceful");
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const today = new Date().toISOString().split("T")[0];
