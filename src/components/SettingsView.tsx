@@ -11,7 +11,10 @@ import {
   LogOut,
   Trash2,
   Download,
+  Send,
+  X,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useHabits } from "@/hooks/useHabits";
@@ -19,6 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
 const SettingsView = () => {
+  const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { isPremium, status, FREE_HABIT_LIMIT } = useSubscription();
   const { habits } = useHabits();
@@ -26,6 +30,9 @@ const SettingsView = () => {
   const [haptics, setHaptics] = useState(true);
   const [holdDuration, setHoldDuration] = useState("600");
   const [resetConfirm, setResetConfirm] = useState(false);
+  const [showSupport, setShowSupport] = useState(false);
+  const [supportSubject, setSupportSubject] = useState("");
+  const [supportMessage, setSupportMessage] = useState("");
 
   const handleResetStreaks = async () => {
     if (!resetConfirm) {
@@ -78,6 +85,19 @@ const SettingsView = () => {
       title: "contact support",
       description: "email support to delete your account and all data",
     });
+  };
+
+  const handleSendSupport = () => {
+    if (!supportMessage.trim()) return;
+    const subject = encodeURIComponent(supportSubject.trim() || "discipline. — help request");
+    const body = encodeURIComponent(
+      `${supportMessage.trim()}\n\n---\nUser: ${user?.email ?? "unknown"}\nDate: ${new Date().toISOString()}`
+    );
+    window.open(`mailto:illuminova123@gmail.com?subject=${subject}&body=${body}`, "_blank");
+    setSupportSubject("");
+    setSupportMessage("");
+    setShowSupport(false);
+    toast({ title: "opening email", description: "your email client should open now" });
   };
 
   return (
@@ -193,12 +213,63 @@ const SettingsView = () => {
       <div className="space-y-1">
         <p className="text-xs text-muted-foreground font-medium px-1 mb-2">account</p>
         <div className="bg-card rounded-lg border border-border divide-y divide-border">
-          <SettingLink icon={Shield} label="privacy policy" description="how we handle your data" />
-          <SettingLink icon={HelpCircle} label="help & support" description="get in touch" />
+          <SettingLink
+            icon={Shield}
+            label="privacy policy"
+            description="how we handle your data"
+            onClick={() => navigate("/privacy")}
+          />
+          <SettingLink
+            icon={HelpCircle}
+            label="help & support"
+            description="get in touch"
+            onClick={() => setShowSupport(true)}
+          />
           <SettingLink icon={LogOut} label="sign out" destructive onClick={signOut} />
           <SettingLink icon={Trash2} label="delete account" description="permanently remove all data" destructive onClick={handleDeleteAccount} />
         </div>
       </div>
+
+      {/* Support Dialog */}
+      {showSupport && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-end justify-center animate-fade-in">
+          <div className="bg-card border border-border rounded-t-2xl w-full max-w-md p-5 space-y-4 animate-slide-up">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold text-foreground">help & support</p>
+                <p className="text-[10px] text-muted-foreground">we'll get back to you as soon as possible</p>
+              </div>
+              <button onClick={() => setShowSupport(false)} className="p-1.5 text-muted-foreground hover:text-foreground">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <input
+              value={supportSubject}
+              onChange={(e) => setSupportSubject(e.target.value)}
+              placeholder="subject (optional)"
+              className="w-full bg-muted rounded-lg px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none"
+            />
+
+            <textarea
+              value={supportMessage}
+              onChange={(e) => setSupportMessage(e.target.value)}
+              placeholder="describe your issue or question..."
+              autoFocus
+              className="w-full bg-muted rounded-lg px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none resize-none min-h-[100px]"
+            />
+
+            <button
+              onClick={handleSendSupport}
+              disabled={!supportMessage.trim()}
+              className="w-full py-3 rounded-lg bg-primary text-primary-foreground text-sm font-medium disabled:opacity-30 transition-all flex items-center justify-center gap-2"
+            >
+              <Send className="w-3.5 h-3.5" />
+              send message
+            </button>
+          </div>
+        </div>
+      )}
 
       <p className="text-[10px] text-muted-foreground text-center pt-2">
         discipline. v1.0.0
