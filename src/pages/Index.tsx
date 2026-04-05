@@ -1,5 +1,5 @@
-import { useState, useCallback } from "react";
-import { Settings as SettingsIcon } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Settings as SettingsIcon, Plus, Trash2 } from "lucide-react";
 import FocusOrb from "@/components/FocusOrb";
 import ProgressRing from "@/components/ProgressRing";
 import HabitRow from "@/components/HabitRow";
@@ -10,43 +10,52 @@ import GuideView from "@/components/GuideView";
 import JournalView from "@/components/JournalView";
 import SettingsView from "@/components/SettingsView";
 import RitualsView from "@/components/RitualsView";
+import OnboardingView from "@/components/OnboardingView";
+import AddHabitDialog from "@/components/AddHabitDialog";
+import { useHabits } from "@/hooks/useHabits";
+import { useAuth } from "@/contexts/AuthContext";
 
 type Tab = "home" | "analytics" | "rituals" | "guide" | "journal" | "settings";
 
-interface Habit {
-  id: string;
-  name: string;
-  streak: number;
-  friction: "low" | "medium" | "heavy";
-  completed: boolean;
-}
-
-const initialHabits: Habit[] = [
-  { id: "1", name: "meditate 10 min", streak: 12, friction: "low", completed: false },
-  { id: "2", name: "exercise", streak: 5, friction: "heavy", completed: false },
-  { id: "3", name: "read 20 pages", streak: 8, friction: "medium", completed: false },
-  { id: "4", name: "no coffee", streak: 26, friction: "heavy", completed: false },
-  { id: "5", name: "journal", streak: 15, friction: "low", completed: false },
-];
-
 const Index = () => {
+  const { user } = useAuth();
+  const { habits, completedIds, isLoading, completeHabit, addHabit, deleteHabit } = useHabits();
   const [activeTab, setActiveTab] = useState<Tab>("home");
-  const [habits, setHabits] = useState<Habit[]>(initialHabits);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showAddHabit, setShowAddHabit] = useState(false);
 
-  const completedCount = habits.filter((h) => h.completed).length;
+  // Detect first-time user (no habits yet, just signed up)
+  useEffect(() => {
+    if (!isLoading && habits.length === 0 && user) {
+      // Check if user was created recently (within last 60 seconds)
+      const createdAt = new Date(user.created_at).getTime();
+      const now = Date.now();
+      if (now - createdAt < 60_000) {
+        setShowOnboarding(true);
+      }
+    }
+  }, [isLoading, habits.length, user]);
+
+  const completedCount = habits.filter((h) => completedIds.has(h.id)).length;
   const progress = habits.length > 0 ? completedCount / habits.length : 0;
-
-  const completeHabit = useCallback((id: string) => {
-    setHabits((prev) =>
-      prev.map((h) => (h.id === id ? { ...h, completed: true } : h))
-    );
-  }, []);
 
   const today = new Date().toLocaleDateString("en-us", {
     weekday: "long",
     month: "long",
     day: "numeric",
   });
+
+  if (showOnboarding) {
+    return <OnboardingView onComplete={() => setShowOnboarding(false)} />;
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -73,21 +82,54 @@ const Index = () => {
               <FocusOrb progress={progress} />
               <ProgressRing progress={progress} />
             </div>
-            <GoalCard title="86% through no-coffee month" progress={86} />
+
+            {habits.length > 0 && (
+              <GoalCard
+                title={`${completedCount}/${habits.length} habits done today`}
+                progress={Math.round(progress * 100)}
+              />
+            )}
+
             <div>
-              <p className="text-xs text-muted-foreground mb-3 font-medium">today's habits</p>
-              <div className="space-y-2">
-                {habits.map((habit) => (
-                  <HabitRow
-                    key={habit.id}
-                    name={habit.name}
-                    streak={habit.streak}
-                    friction={habit.friction}
-                    completed={habit.completed}
-                    onComplete={() => completeHabit(habit.id)}
-                  />
-                ))}
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs text-muted-foreground font-medium">today's habits</p>
+                <button
+                  onClick={() => setShowAddHabit(true)}
+                  className="text-primary hover:text-primary/80 transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
               </div>
+
+              {habits.length === 0 ? (
+                <button
+                  onClick={() => setShowAddHabit(true)}
+                  className="w-full bg-card border border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors"
+                >
+                  <Plus className="w-6 h-6 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">add your first habit</p>
+                </button>
+              ) : (
+                <div className="space-y-2">
+                  {habits.map((habit) => (
+                    <div key={habit.id} className="group relative">
+                      <HabitRow
+                        name={habit.name}
+                        streak={habit.streak}
+                        friction={habit.friction}
+                        completed={completedIds.has(habit.id)}
+                        onComplete={() => completeHabit(habit.id)}
+                      />
+                      <button
+                        onClick={() => deleteHabit(habit.id)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 p-1.5 text-muted-foreground hover:text-destructive transition-all"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -100,6 +142,13 @@ const Index = () => {
       </div>
 
       <BottomNav active={activeTab} onChange={setActiveTab} />
+      <AddHabitDialog
+        open={showAddHabit}
+        onClose={() => setShowAddHabit(false)}
+        onAdd={async (name, friction) => {
+          await addHabit({ name, friction });
+        }}
+      />
     </div>
   );
 };
