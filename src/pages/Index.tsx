@@ -7,8 +7,9 @@ import BottomNav from "@/components/BottomNav";
 import AnalyticsView from "@/components/AnalyticsView";
 import GuideView from "@/components/GuideView";
 import JournalView from "@/components/JournalView";
+import SettingsView from "@/components/SettingsView";
 
-type Tab = "home" | "analytics" | "guide" | "journal";
+type Tab = "home" | "analytics" | "guide" | "journal" | "settings";
 
 interface Habit {
   id: string;
@@ -56,16 +57,11 @@ const Index = () => {
 
         {activeTab === "home" && (
           <div className="animate-fade-in space-y-5">
-            {/* Orb + Progress */}
             <div className="flex items-center justify-between">
               <FocusOrb progress={progress} />
               <ProgressRing progress={progress} />
             </div>
-
-            {/* Goal */}
             <GoalCard title="86% through no-coffee month" progress={86} />
-
-            {/* Habits */}
             <div>
               <p className="text-xs text-muted-foreground mb-3 font-medium">today's habits</p>
               <div className="space-y-2">
@@ -87,6 +83,7 @@ const Index = () => {
         {activeTab === "analytics" && <AnalyticsView />}
         {activeTab === "guide" && <GuideView />}
         {activeTab === "journal" && <JournalView />}
+        {activeTab === "settings" && <SettingsView />}
       </div>
 
       <BottomNav active={activeTab} onChange={setActiveTab} />

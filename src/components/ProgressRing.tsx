@@ -9,13 +9,13 @@ const ProgressRing = ({ progress }: { progress: number }) => {
           <circle
             cx="50" cy="50" r="45"
             fill="none"
-            stroke="hsl(220 10% 92%)"
+            stroke="hsl(var(--muted))"
             strokeWidth="6"
           />
           <circle
             cx="50" cy="50" r="45"
             fill="none"
-            stroke="hsl(213 94% 78%)"
+            stroke="hsl(var(--primary))"
             strokeWidth="6"
             strokeLinecap="round"
             strokeDasharray={circumference}
