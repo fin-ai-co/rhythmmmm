@@ -153,7 +153,7 @@ const Index = () => {
 
         {activeTab === "analytics" && <AnalyticsView />}
         {activeTab === "rituals" && <RitualsView />}
-        {activeTab === "guide" && <GuideView />}
+        {activeTab === "guide" && (isPremium ? <GuideView /> : <PremiumGate feature="ai guide" />)}
         {activeTab === "journal" && <JournalView />}
         {activeTab === "settings" && <SettingsView />}
       </div>
