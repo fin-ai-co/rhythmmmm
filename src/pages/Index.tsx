@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { toast } from "@/hooks/use-toast";
 import { Settings as SettingsIcon, Plus, Trash2 } from "lucide-react";
 import FocusOrb from "@/components/FocusOrb";
 import ProgressRing from "@/components/ProgressRing";
@@ -13,13 +14,16 @@ import RitualsView from "@/components/RitualsView";
 import OnboardingView from "@/components/OnboardingView";
 import AddHabitDialog from "@/components/AddHabitDialog";
 import { useHabits } from "@/hooks/useHabits";
+import { useSubscription } from "@/hooks/useSubscription";
 import { useAuth } from "@/contexts/AuthContext";
+import PremiumGate from "@/components/PremiumGate";
 
 type Tab = "home" | "analytics" | "rituals" | "guide" | "journal" | "settings";
 
 const Index = () => {
   const { user } = useAuth();
   const { habits, completedIds, isLoading, completeHabit, addHabit, deleteHabit } = useHabits();
+  const { isPremium, canAddHabit, FREE_HABIT_LIMIT } = useSubscription();
   const [activeTab, setActiveTab] = useState<Tab>("home");
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showAddHabit, setShowAddHabit] = useState(false);
@@ -93,12 +97,25 @@ const Index = () => {
             <div>
               <div className="flex items-center justify-between mb-3">
                 <p className="text-xs text-muted-foreground font-medium">today's habits</p>
-                <button
-                  onClick={() => setShowAddHabit(true)}
-                  className="text-primary hover:text-primary/80 transition-colors"
-                >
-                  <Plus className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-2">
+                  {!isPremium && (
+                    <span className="text-[10px] text-muted-foreground">
+                      {habits.length}/{FREE_HABIT_LIMIT} free
+                    </span>
+                  )}
+                  <button
+                    onClick={() => {
+                      if (!canAddHabit(habits.length)) {
+                        toast({ title: "upgrade required", description: `free plan allows ${FREE_HABIT_LIMIT} habits. upgrade to premium for unlimited.`, variant: "destructive" });
+                        return;
+                      }
+                      setShowAddHabit(true);
+                    }}
+                    className="text-primary hover:text-primary/80 transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
 
               {habits.length === 0 ? (
@@ -136,7 +153,7 @@ const Index = () => {
 
         {activeTab === "analytics" && <AnalyticsView />}
         {activeTab === "rituals" && <RitualsView />}
-        {activeTab === "guide" && <GuideView />}
+        {activeTab === "guide" && (isPremium ? <GuideView /> : <PremiumGate feature="ai guide" />)}
         {activeTab === "journal" && <JournalView />}
         {activeTab === "settings" && <SettingsView />}
       </div>
