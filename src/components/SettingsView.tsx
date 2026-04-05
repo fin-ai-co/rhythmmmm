@@ -122,12 +122,14 @@ const SettingLink = ({
   icon: Icon,
   label,
   destructive,
+  onClick,
 }: {
   icon: typeof Shield;
   label: string;
   destructive?: boolean;
+  onClick?: () => void;
 }) => (
-  <button className="w-full flex items-center gap-3 p-4 text-left transition-colors hover:bg-muted/50">
+  <button onClick={onClick} className="w-full flex items-center gap-3 p-4 text-left transition-colors hover:bg-muted/50">
     <Icon className={`w-4 h-4 ${destructive ? "text-destructive" : "text-muted-foreground"}`} />
     <span className={`text-sm ${destructive ? "text-destructive" : "text-foreground"}`}>
       {label}
