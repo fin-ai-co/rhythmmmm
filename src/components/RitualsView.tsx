@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link2, Sunrise, Moon, Zap, ChevronRight, Plus, X, Trash2 } from "lucide-react";
+import { motion, useMotionValue, useTransform, AnimatePresence } from "framer-motion";
 
 interface Ritual {
   id: string;
