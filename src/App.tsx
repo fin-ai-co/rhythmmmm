@@ -38,6 +38,13 @@ const AppRoutes = () => {
   const [splashDone, setSplashDone] = useState(false);
   const handleSplashFinish = useCallback(() => setSplashDone(true), []);
 
+  // Initialize Apple In-App Purchases when app starts
+  useEffect(() => {
+    initializePurchases().catch((err) =>
+      console.warn("[IAP] Init failed:", err)
+    );
+  }, []);
+
   if (!splashDone || loading) {
     return <SplashScreen onFinish={handleSplashFinish} />;
   }
