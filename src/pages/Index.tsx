@@ -34,6 +34,19 @@ const Index = () => {
   useStreakUpdater();
 
   // Detect first-time user (no habits yet, just signed up)
+  // Show paywall 30s after login for trial users
+  useEffect(() => {
+    if (!hasAccess && !subLoading) {
+      // Expired — show immediately
+      setShowPaywall(true);
+      return;
+    }
+    if (isTrialActive && !isPremium) {
+      const timer = setTimeout(() => setShowPaywall(true), 30_000);
+      return () => clearTimeout(timer);
+    }
+  }, [hasAccess, isTrialActive, isPremium, subLoading]);
+
   useEffect(() => {
     if (!isLoading && habits.length === 0 && user) {
       // Check if user was created recently (within last 60 seconds)
