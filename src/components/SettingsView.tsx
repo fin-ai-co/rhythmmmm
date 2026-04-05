@@ -120,9 +120,13 @@ const SettingsView = () => {
                 <Crown className="w-3 h-3 text-amber-400" />
                 <span className="text-xs text-amber-400 font-medium">premium</span>
               </>
+            ) : isTrialActive ? (
+              <span className="text-xs text-primary font-medium">
+                trial · {trialDaysLeft}d left
+              </span>
             ) : (
-              <span className="text-xs text-muted-foreground">
-                free plan · {habits.length}/{FREE_HABIT_LIMIT} habits
+              <span className="text-xs text-destructive font-medium">
+                trial expired
               </span>
             )}
           </div>
