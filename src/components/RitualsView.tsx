@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link2, Sunrise, Moon, Zap, ChevronRight, Plus, X, Trash2 } from "lucide-react";
+import { motion, useMotionValue, useTransform, AnimatePresence } from "framer-motion";
 
 interface Ritual {
   id: string;
@@ -47,6 +48,45 @@ const initialRituals: Ritual[] = [
     activeStep: 0,
   },
 ];
+
+const DELETE_THRESHOLD = -80;
+
+const SwipeToDelete = ({ children, onDelete }: { children: React.ReactNode; onDelete: () => void }) => {
+  const x = useMotionValue(0);
+  const bgOpacity = useTransform(x, [-120, -60, 0], [1, 0.8, 0]);
+  const iconScale = useTransform(x, [-100, -60, 0], [1.2, 1, 0.5]);
+
+  return (
+    <div className="relative overflow-hidden rounded-lg">
+      {/* Red background behind */}
+      <motion.div
+        className="absolute inset-0 bg-destructive flex items-center justify-end pr-6 rounded-lg"
+        style={{ opacity: bgOpacity }}
+      >
+        <motion.div style={{ scale: iconScale }} className="flex items-center gap-2 text-white">
+          <Trash2 className="w-5 h-5" />
+          <span className="text-sm font-medium">delete</span>
+        </motion.div>
+      </motion.div>
+
+      {/* Swipeable card */}
+      <motion.div
+        drag="x"
+        dragConstraints={{ left: -120, right: 0 }}
+        dragElastic={0.1}
+        style={{ x }}
+        onDragEnd={(_, info) => {
+          if (info.offset.x < DELETE_THRESHOLD) {
+            onDelete();
+          }
+        }}
+        className="relative z-10 cursor-grab active:cursor-grabbing"
+      >
+        {children}
+      </motion.div>
+    </div>
+  );
+};
 
 const RitualsView = () => {
   const [rituals, setRituals] = useState<Ritual[]>(initialRituals);
@@ -202,133 +242,124 @@ const RitualsView = () => {
           const progressPct = (ritual.steps.filter((s) => s.completed).length / ritual.steps.length) * 100;
 
           return (
-            <div
-              key={ritual.id}
-              className="bg-card rounded-lg border border-border overflow-hidden transition-all duration-300"
-            >
-              {/* Header */}
-              <button
-                onClick={() => setExpandedId(isExpanded ? null : ritual.id)}
-                className="w-full flex items-center justify-between p-4"
+            <SwipeToDelete key={ritual.id} onDelete={() => deleteRitual(ritual.id)}>
+              <div
+                className="bg-card rounded-lg border border-border overflow-hidden transition-all duration-300"
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center">
-                    <Icon className="w-4 h-4 text-primary" />
+                {/* Header */}
+                <button
+                  onClick={() => setExpandedId(isExpanded ? null : ritual.id)}
+                  className="w-full flex items-center justify-between p-4"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center">
+                      <Icon className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-sm font-medium text-foreground">{ritual.name}</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {allDone ? "completed ✓" : `${ritual.activeStep} of ${ritual.steps.length} steps`}
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-left">
-                    <p className="text-sm font-medium text-foreground">{ritual.name}</p>
-                    <p className="text-[10px] text-muted-foreground">
-                      {allDone ? "completed ✓" : `${ritual.activeStep} of ${ritual.steps.length} steps`}
-                    </p>
-                  </div>
-                </div>
-                <ChevronRight
-                  className={`w-4 h-4 text-muted-foreground transition-transform duration-300 ${
-                    isExpanded ? "rotate-90" : ""
-                  }`}
-                />
-              </button>
-
-              {/* Progress bar */}
-              <div className="px-4 pb-1">
-                <div className="w-full h-1 bg-muted rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-primary rounded-full transition-all duration-500"
-                    style={{ width: `${progressPct}%` }}
+                  <ChevronRight
+                    className={`w-4 h-4 text-muted-foreground transition-transform duration-300 ${
+                      isExpanded ? "rotate-90" : ""
+                    }`}
                   />
+                </button>
+
+                {/* Progress bar */}
+                <div className="px-4 pb-1">
+                  <div className="w-full h-1 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-primary rounded-full transition-all duration-500"
+                      style={{ width: `${progressPct}%` }}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              {/* Expanded steps */}
-              {isExpanded && (
-                <div className="px-4 pb-4 pt-3 space-y-1 animate-fade-in">
-                  {ritual.steps.map((step, i) => {
-                    const isActive = i === ritual.activeStep && !allDone;
-                    const isDone = step.completed;
+                {/* Expanded steps */}
+                {isExpanded && (
+                  <div className="px-4 pb-4 pt-3 space-y-1 animate-fade-in">
+                    {ritual.steps.map((step, i) => {
+                      const isActive = i === ritual.activeStep && !allDone;
+                      const isDone = step.completed;
 
-                    return (
-                      <div key={step.id}>
-                        <div
-                          className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-300 ${
-                            isActive
-                              ? "bg-primary/10 border border-primary/30"
-                              : isDone
-                              ? "opacity-50"
-                              : "opacity-30"
-                          }`}
-                        >
-                          {/* Chain connector */}
-                          <div className="flex flex-col items-center">
-                            <div
-                              className={`w-3 h-3 rounded-full border-2 transition-all duration-300 ${
-                                isDone
-                                  ? "bg-primary border-primary"
-                                  : isActive
-                                  ? "border-primary animate-pulse"
-                                  : "border-muted-foreground/30"
-                              }`}
-                            />
+                      return (
+                        <div key={step.id}>
+                          <div
+                            className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-300 ${
+                              isActive
+                                ? "bg-primary/10 border border-primary/30"
+                                : isDone
+                                ? "opacity-50"
+                                : "opacity-30"
+                            }`}
+                          >
+                            <div className="flex flex-col items-center">
+                              <div
+                                className={`w-3 h-3 rounded-full border-2 transition-all duration-300 ${
+                                  isDone
+                                    ? "bg-primary border-primary"
+                                    : isActive
+                                    ? "border-primary animate-pulse"
+                                    : "border-muted-foreground/30"
+                                }`}
+                              />
+                            </div>
+
+                            <div className="flex-1">
+                              <p
+                                className={`text-sm ${
+                                  isDone ? "line-through text-muted-foreground" : "text-foreground"
+                                }`}
+                              >
+                                {step.habit}
+                              </p>
+                              <p className="text-[10px] text-muted-foreground">{step.duration}</p>
+                            </div>
+
+                            {isActive && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  advanceStep(ritual.id);
+                                }}
+                                className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium transition-all duration-300 hover:bg-primary/90"
+                              >
+                                done
+                              </button>
+                            )}
                           </div>
 
-                          <div className="flex-1">
-                            <p
-                              className={`text-sm ${
-                                isDone ? "line-through text-muted-foreground" : "text-foreground"
-                              }`}
-                            >
-                              {step.habit}
-                            </p>
-                            <p className="text-[10px] text-muted-foreground">{step.duration}</p>
-                          </div>
-
-                          {isActive && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                advanceStep(ritual.id);
-                              }}
-                              className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium transition-all duration-300 hover:bg-primary/90"
-                            >
-                              done
-                            </button>
+                          {i < ritual.steps.length - 1 && (
+                            <div className="flex justify-start ml-[1.35rem]">
+                              <div
+                                className={`w-0.5 h-3 transition-all duration-300 ${
+                                  isDone ? "bg-primary/50" : "bg-muted"
+                                }`}
+                              />
+                            </div>
                           )}
                         </div>
+                      );
+                    })}
 
-                        {/* Chain line */}
-                        {i < ritual.steps.length - 1 && (
-                          <div className="flex justify-start ml-[1.35rem]">
-                            <div
-                              className={`w-0.5 h-3 transition-all duration-300 ${
-                                isDone ? "bg-primary/50" : "bg-muted"
-                              }`}
-                            />
-                          </div>
-                        )}
+                    {allDone && (
+                      <div className="flex items-center gap-2 mt-2">
+                        <button
+                          onClick={() => resetRitual(ritual.id)}
+                          className="flex-1 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          reset chain
+                        </button>
                       </div>
-                    );
-                  })}
-
-                  {allDone && (
-                    <div className="flex items-center gap-2 mt-2">
-                      <button
-                        onClick={() => resetRitual(ritual.id)}
-                        className="flex-1 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        reset chain
-                      </button>
-                    </div>
-                  )}
-
-                  <button
-                    onClick={() => deleteRitual(ritual.id)}
-                    className="w-full flex items-center justify-center gap-1.5 py-2 mt-1 text-xs text-muted-foreground/50 hover:text-destructive transition-colors duration-300"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                    delete ritual
-                  </button>
-                </div>
-              )}
-            </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </SwipeToDelete>
           );
         })}
       </div>
