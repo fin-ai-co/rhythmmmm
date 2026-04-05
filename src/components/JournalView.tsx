@@ -16,10 +16,10 @@ const moodOptions = [
 type MoodValue = (typeof moodOptions)[number]["value"];
 
 const moodColor: Record<string, string> = {
-  on_fire: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-  steady: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-  meh: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-  rough: "bg-rose-500/20 text-rose-400 border-rose-500/30",
+  energized: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+  focused: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+  peaceful: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+  struggling: "bg-rose-500/20 text-rose-400 border-rose-500/30",
 };
 
 /**
