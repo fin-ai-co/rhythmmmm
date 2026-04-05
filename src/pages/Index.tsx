@@ -93,6 +93,9 @@ const Index = () => {
                 title={`${completedCount}/${habits.length} habits done today`}
                 progress={Math.round(progress * 100)}
               />
+              <div className="flex justify-end">
+                <ShareStreak habits={habits} completedCount={completedCount} />
+              </div>
             )}
 
             <div>
