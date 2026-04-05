@@ -7,19 +7,19 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useHabits } from "@/hooks/useHabits";
 
 const moodOptions = [
-  { value: "on_fire", label: "on fire", dot: "bg-amber-400" },
-  { value: "steady", label: "steady", dot: "bg-emerald-400" },
-  { value: "meh", label: "meh", dot: "bg-blue-400" },
-  { value: "rough", label: "rough", dot: "bg-rose-400" },
+  { value: "energized", label: "energized", dot: "bg-amber-400" },
+  { value: "focused", label: "focused", dot: "bg-emerald-400" },
+  { value: "peaceful", label: "peaceful", dot: "bg-blue-400" },
+  { value: "struggling", label: "struggling", dot: "bg-rose-400" },
 ] as const;
 
 type MoodValue = (typeof moodOptions)[number]["value"];
 
 const moodColor: Record<string, string> = {
-  on_fire: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-  steady: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-  meh: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-  rough: "bg-rose-500/20 text-rose-400 border-rose-500/30",
+  energized: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+  focused: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+  peaceful: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+  struggling: "bg-rose-500/20 text-rose-400 border-rose-500/30",
 };
 
 /**
@@ -76,7 +76,7 @@ const JournalView = () => {
   const { habits, completedIds } = useHabits();
   const [isWriting, setIsWriting] = useState(false);
   const [newText, setNewText] = useState("");
-  const [selectedMood, setSelectedMood] = useState<MoodValue>("steady");
+  const [selectedMood, setSelectedMood] = useState<MoodValue>("peaceful");
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const today = new Date().toISOString().split("T")[0];
@@ -164,10 +164,10 @@ const JournalView = () => {
     moodOptions.find((m) => m.value === mood) ?? moodOptions[1];
 
   const moodDotMap: Record<string, string> = {
-    on_fire: "bg-amber-400",
-    steady: "bg-emerald-400",
-    meh: "bg-blue-400",
-    rough: "bg-rose-400",
+    energized: "bg-amber-400",
+    focused: "bg-emerald-400",
+    peaceful: "bg-blue-400",
+    struggling: "bg-rose-400",
   };
 
   // Mood timeline — last 7 entries
@@ -285,10 +285,10 @@ const JournalView = () => {
             {moodTimeline.map((entry, i) => {
               const config = getMoodConfig(entry.mood);
               const heights: Record<string, string> = {
-                on_fire: "h-12",
-                steady: "h-9",
-                meh: "h-6",
-                rough: "h-3",
+                energized: "h-12",
+                focused: "h-9",
+                peaceful: "h-6",
+                struggling: "h-3",
               };
               return (
                 <div key={entry.id} className="flex-1 flex flex-col items-center gap-1">
