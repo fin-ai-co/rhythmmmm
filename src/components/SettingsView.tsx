@@ -21,7 +21,7 @@ const SettingsView = () => {
           <User className="w-5 h-5 text-primary" />
         </div>
         <div>
-          <p className="text-sm font-medium text-foreground">anonymous</p>
+          <p className="text-sm font-medium text-foreground">{user?.email ?? "anonymous"}</p>
           <p className="text-xs text-muted-foreground">free plan</p>
         </div>
       </div>
