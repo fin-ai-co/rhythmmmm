@@ -55,9 +55,21 @@ const SwipeToDelete = ({ children, onDelete }: { children: React.ReactNode; onDe
   const x = useMotionValue(0);
   const bgOpacity = useTransform(x, [-120, -60, 0], [1, 0.8, 0]);
   const iconScale = useTransform(x, [-100, -60, 0], [1.2, 1, 0.5]);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDragEnd = (_: any, info: any) => {
+    if (info.offset.x < DELETE_THRESHOLD) {
+      setDeleting(true);
+    }
+  };
 
   return (
-    <div className="relative overflow-hidden rounded-lg">
+    <motion.div
+      className="relative overflow-hidden rounded-lg"
+      animate={deleting ? { height: 0, opacity: 0, marginBottom: 0 } : {}}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
+      onAnimationComplete={() => { if (deleting) onDelete(); }}
+    >
       {/* Red background behind */}
       <motion.div
         className="absolute inset-0 bg-destructive flex items-center justify-end pr-6 rounded-lg"
@@ -75,16 +87,14 @@ const SwipeToDelete = ({ children, onDelete }: { children: React.ReactNode; onDe
         dragConstraints={{ left: -120, right: 0 }}
         dragElastic={0.1}
         style={{ x }}
-        onDragEnd={(_, info) => {
-          if (info.offset.x < DELETE_THRESHOLD) {
-            onDelete();
-          }
-        }}
+        animate={deleting ? { x: -400 } : undefined}
+        transition={{ duration: 0.25 }}
+        onDragEnd={handleDragEnd}
         className="relative z-10 cursor-grab active:cursor-grabbing"
       >
         {children}
       </motion.div>
-    </div>
+    </motion.div>
   );
 };
 
