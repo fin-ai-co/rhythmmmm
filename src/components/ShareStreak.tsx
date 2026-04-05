@@ -121,7 +121,7 @@ const ShareStreak = ({ habits, completedCount }: ShareStreakProps) => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = "discipline-streak.png";
+        a.download = "rhythm-streak.png";
         a.click();
         URL.revokeObjectURL(url);
         toast({ title: "image downloaded", description: "share it wherever you like" });

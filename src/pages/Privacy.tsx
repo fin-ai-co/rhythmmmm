@@ -89,7 +89,7 @@ const Privacy = () => {
               <h2 className="text-base font-semibold text-foreground mb-2">8. changes to this policy</h2>
               <p>
                 we may update this privacy policy from time to time. we will notify you of any material
-                changes by posting the new policy within the app. your continued use of discipline after
+                changes by posting the new policy within the app. your continued use of rhythm after
                 changes constitutes acceptance of the updated policy.
               </p>
             </section>
