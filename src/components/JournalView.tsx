@@ -130,7 +130,7 @@ const JournalView = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["journal"] });
+      queryClient.invalidateQueries({ queryKey: ["journal", user?.id] });
     },
   });
 
