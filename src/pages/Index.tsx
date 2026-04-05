@@ -14,6 +14,7 @@ import SettingsView from "@/components/SettingsView";
 import RitualsView from "@/components/RitualsView";
 import OnboardingView from "@/components/OnboardingView";
 import AddHabitDialog from "@/components/AddHabitDialog";
+import SubscriptionPaywall from "@/components/SubscriptionPaywall";
 import { useHabits } from "@/hooks/useHabits";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useStreakUpdater } from "@/hooks/useStreakUpdater";
@@ -25,13 +26,27 @@ type Tab = "home" | "analytics" | "rituals" | "guide" | "journal" | "settings";
 const Index = () => {
   const { user } = useAuth();
   const { habits, completedIds, isLoading, completeHabit, addHabit, deleteHabit } = useHabits();
-  const { isPremium, canAddHabit, FREE_HABIT_LIMIT } = useSubscription();
+  const { hasAccess, isPremium, isTrialActive, isTrialExpired, isExpired, trialDaysLeft, isLoading: subLoading } = useSubscription();
   const [activeTab, setActiveTab] = useState<Tab>("home");
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showAddHabit, setShowAddHabit] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
   useStreakUpdater();
 
   // Detect first-time user (no habits yet, just signed up)
+  // Show paywall 30s after login for trial users
+  useEffect(() => {
+    if (!hasAccess && !subLoading) {
+      // Expired — show immediately
+      setShowPaywall(true);
+      return;
+    }
+    if (isTrialActive && !isPremium) {
+      const timer = setTimeout(() => setShowPaywall(true), 30_000);
+      return () => clearTimeout(timer);
+    }
+  }, [hasAccess, isTrialActive, isPremium, subLoading]);
+
   useEffect(() => {
     if (!isLoading && habits.length === 0 && user) {
       // Check if user was created recently (within last 60 seconds)
@@ -105,20 +120,14 @@ const Index = () => {
             <div>
               <div className="flex items-center justify-between mb-3">
                 <p className="text-xs text-muted-foreground font-medium">today's habits</p>
-                <div className="flex items-center gap-2">
-                  {!isPremium && (
+              <div className="flex items-center gap-2">
+                  {isTrialActive && (
                     <span className="text-[10px] text-muted-foreground">
-                      {habits.length}/{FREE_HABIT_LIMIT} free
+                      {trialDaysLeft}d trial left
                     </span>
                   )}
                   <button
-                    onClick={() => {
-                      if (!canAddHabit(habits.length)) {
-                        toast({ title: "upgrade required", description: `free plan allows ${FREE_HABIT_LIMIT} habits. upgrade to premium for unlimited.`, variant: "destructive" });
-                        return;
-                      }
-                      setShowAddHabit(true);
-                    }}
+                    onClick={() => setShowAddHabit(true)}
                     className="text-primary hover:text-primary/80 transition-colors"
                   >
                     <Plus className="w-4 h-4" />
@@ -174,6 +183,16 @@ const Index = () => {
           await addHabit({ name, friction });
         }}
       />
+
+      {/* Subscription paywall */}
+      {showPaywall && (
+        <SubscriptionPaywall
+          trialDaysLeft={trialDaysLeft}
+          isTrialExpired={isTrialExpired}
+          forceLock={!hasAccess}
+          onDismiss={hasAccess ? () => setShowPaywall(false) : undefined}
+        />
+      )}
     </div>
   );
 };

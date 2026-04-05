@@ -24,7 +24,7 @@ import { toast } from "@/hooks/use-toast";
 const SettingsView = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
-  const { isPremium, status, FREE_HABIT_LIMIT } = useSubscription();
+  const { isPremium, isTrialActive, trialDaysLeft, hasAccess } = useSubscription();
   const { habits } = useHabits();
   const [notifications, setNotifications] = useState(true);
   const [haptics, setHaptics] = useState(true);
@@ -120,9 +120,13 @@ const SettingsView = () => {
                 <Crown className="w-3 h-3 text-amber-400" />
                 <span className="text-xs text-amber-400 font-medium">premium</span>
               </>
+            ) : isTrialActive ? (
+              <span className="text-xs text-primary font-medium">
+                trial · {trialDaysLeft}d left
+              </span>
             ) : (
-              <span className="text-xs text-muted-foreground">
-                free plan · {habits.length}/{FREE_HABIT_LIMIT} habits
+              <span className="text-xs text-destructive font-medium">
+                trial expired
               </span>
             )}
           </div>
@@ -137,7 +141,7 @@ const SettingsView = () => {
             <p className="text-sm font-medium text-foreground">upgrade to premium</p>
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            unlimited habits, ai guide, and more. available as an in-app purchase.
+            $4.99/mo or $49.99/yr — unlimited habits, ai guide, and more.
           </p>
         </div>
       )}
