@@ -82,6 +82,11 @@ const RitualsView = () => {
     );
   };
 
+  const deleteRitual = (ritualId: string) => {
+    setRituals((prev) => prev.filter((r) => r.id !== ritualId));
+    if (expandedId === ritualId) setExpandedId(null);
+  };
+
   const createRitual = () => {
     if (!newName.trim() || newSteps.every((s) => !s.trim())) return;
     const ritual: Ritual = {
