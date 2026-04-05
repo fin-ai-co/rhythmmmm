@@ -89,13 +89,15 @@ const Index = () => {
             </div>
 
             {habits.length > 0 && (
-              <GoalCard
-                title={`${completedCount}/${habits.length} habits done today`}
-                progress={Math.round(progress * 100)}
-              />
-              <div className="flex justify-end">
-                <ShareStreak habits={habits} completedCount={completedCount} />
-              </div>
+              <>
+                <GoalCard
+                  title={`${completedCount}/${habits.length} habits done today`}
+                  progress={Math.round(progress * 100)}
+                />
+                <div className="flex justify-end">
+                  <ShareStreak habits={habits} completedCount={completedCount} />
+                </div>
+              </>
             )}
 
             <div>
