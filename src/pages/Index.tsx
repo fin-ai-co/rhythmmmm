@@ -183,6 +183,16 @@ const Index = () => {
           await addHabit({ name, friction });
         }}
       />
+
+      {/* Subscription paywall */}
+      {showPaywall && (
+        <SubscriptionPaywall
+          trialDaysLeft={trialDaysLeft}
+          isTrialExpired={isTrialExpired}
+          forceLock={!hasAccess}
+          onDismiss={hasAccess ? () => setShowPaywall(false) : undefined}
+        />
+      )}
     </div>
   );
 };
