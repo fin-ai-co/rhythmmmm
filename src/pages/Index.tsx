@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { toast } from "@/hooks/use-toast";
 import { Settings as SettingsIcon, Plus, Trash2 } from "lucide-react";
 import FocusOrb from "@/components/FocusOrb";
 import ProgressRing from "@/components/ProgressRing";
