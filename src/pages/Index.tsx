@@ -13,7 +13,9 @@ import RitualsView from "@/components/RitualsView";
 import OnboardingView from "@/components/OnboardingView";
 import AddHabitDialog from "@/components/AddHabitDialog";
 import { useHabits } from "@/hooks/useHabits";
+import { useSubscription } from "@/hooks/useSubscription";
 import { useAuth } from "@/contexts/AuthContext";
+import PremiumGate from "@/components/PremiumGate";
 
 type Tab = "home" | "analytics" | "rituals" | "guide" | "journal" | "settings";
 
