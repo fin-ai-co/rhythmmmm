@@ -1,13 +1,13 @@
-import { Home, BarChart3, MessageCircle, Feather, Settings } from "lucide-react";
+import { Home, BarChart3, MessageCircle, Feather, Settings, Link2 } from "lucide-react";
 
-type Tab = "home" | "analytics" | "guide" | "journal" | "settings";
+type Tab = "home" | "analytics" | "rituals" | "guide" | "journal" | "settings";
 
 const tabs: { id: Tab; icon: typeof Home; label: string }[] = [
   { id: "home", icon: Home, label: "home" },
+  { id: "rituals", icon: Link2, label: "rituals" },
   { id: "analytics", icon: BarChart3, label: "insights" },
   { id: "guide", icon: MessageCircle, label: "guide" },
   { id: "journal", icon: Feather, label: "journal" },
-  { id: "settings", icon: Settings, label: "settings" },
 ];
 
 const BottomNav = ({ active, onChange }: { active: Tab; onChange: (tab: Tab) => void }) => {
