@@ -164,10 +164,10 @@ const JournalView = () => {
     moodOptions.find((m) => m.value === mood) ?? moodOptions[1];
 
   const moodDotMap: Record<string, string> = {
-    on_fire: "bg-amber-400",
-    steady: "bg-emerald-400",
-    meh: "bg-blue-400",
-    rough: "bg-rose-400",
+    energized: "bg-amber-400",
+    focused: "bg-emerald-400",
+    peaceful: "bg-blue-400",
+    struggling: "bg-rose-400",
   };
 
   // Mood timeline — last 7 entries
