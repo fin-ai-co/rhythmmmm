@@ -1,243 +1,359 @@
 import { useState } from "react";
-import { Plus, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, ChevronDown, ChevronUp, Sparkles, Trash2 } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useHabits } from "@/hooks/useHabits";
 
-interface JournalEntry {
-  id: string;
-  date: Date;
-  text: string;
-  mood: "peaceful" | "focused" | "struggling" | "energized";
-}
+const moodOptions = [
+  { value: "on_fire", icon: "🔥", label: "on fire" },
+  { value: "steady", icon: "⚡", label: "steady" },
+  { value: "meh", icon: "☁️", label: "meh" },
+  { value: "rough", icon: "🌊", label: "rough" },
+] as const;
 
-const moodConfig: Record<string, { icon: string; label: string; gradient: string; glow: string }> = {
-  peaceful: {
-    icon: "☽",
-    label: "peaceful",
-    gradient: "from-blue-400/20 to-indigo-500/20",
-    glow: "shadow-[0_0_12px_hsl(213_94%_78%/0.3)]",
-  },
-  focused: {
-    icon: "◎",
-    label: "focused",
-    gradient: "from-amber-400/20 to-orange-500/20",
-    glow: "shadow-[0_0_12px_hsl(38_90%_60%/0.3)]",
-  },
-  struggling: {
-    icon: "∿",
-    label: "struggling",
-    gradient: "from-rose-400/20 to-red-500/20",
-    glow: "shadow-[0_0_12px_hsl(0_84%_60%/0.3)]",
-  },
-  energized: {
-    icon: "✦",
-    label: "energized",
-    gradient: "from-emerald-400/20 to-teal-500/20",
-    glow: "shadow-[0_0_12px_hsl(160_70%_50%/0.3)]",
-  },
+type MoodValue = (typeof moodOptions)[number]["value"];
+
+const moodColor: Record<string, string> = {
+  on_fire: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+  steady: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+  meh: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+  rough: "bg-rose-500/20 text-rose-400 border-rose-500/30",
 };
 
-const moodColors: Record<string, string> = {
-  peaceful: "bg-primary/20 text-primary",
-  focused: "bg-amber-500/20 text-amber-400",
-  struggling: "bg-destructive/20 text-destructive",
-  energized: "bg-emerald-500/20 text-emerald-400",
-};
+/**
+ * Generates a smart prompt based on today's habit performance.
+ */
+const getSmartPrompt = (
+  completedCount: number,
+  totalCount: number,
+  habitNames: string[],
+  missedNames: string[]
+): { prompt: string; subtext: string } => {
+  if (totalCount === 0) {
+    return {
+      prompt: "what's on your mind today?",
+      subtext: "start journaling your journey",
+    };
+  }
 
-const initialEntries: JournalEntry[] = [
-  {
-    id: "1",
-    date: new Date(Date.now() - 86400000),
-    text: "managed to meditate even when i didn't feel like it. the resistance was the teacher today.",
-    mood: "focused",
-  },
-  {
-    id: "2",
-    date: new Date(Date.now() - 86400000 * 3),
-    text: "broke my no-coffee streak. not mad — just noticing the pattern. stress triggers it every time.",
-    mood: "struggling",
-  },
-  {
-    id: "3",
-    date: new Date(Date.now() - 86400000 * 5),
-    text: "everything clicked today. all five habits done before noon. this is what momentum feels like.",
-    mood: "energized",
-  },
-];
+  const ratio = completedCount / totalCount;
+
+  if (ratio === 1) {
+    return {
+      prompt: "you nailed every habit today. what made it click?",
+      subtext: "capture what works so you can repeat it",
+    };
+  }
+  if (ratio >= 0.7) {
+    return {
+      prompt: `strong day — almost everything done. what would make tomorrow a perfect run?`,
+      subtext: `missed: ${missedNames.join(", ")}`,
+    };
+  }
+  if (ratio >= 0.4) {
+    return {
+      prompt: `you showed up for ${completedCount} habits. what got in the way of the rest?`,
+      subtext: "no judgment — just patterns",
+    };
+  }
+  if (completedCount > 0) {
+    return {
+      prompt: `you still got ${habitNames.slice(0, completedCount).join(" & ")} done. what's one thing you'd change about today?`,
+      subtext: "progress over perfection",
+    };
+  }
+  return {
+    prompt: "tough day — zero habits checked off. what happened?",
+    subtext: "writing it down is a habit too",
+  };
+};
 
 const JournalView = () => {
-  const [entries, setEntries] = useState<JournalEntry[]>(initialEntries);
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const { habits, completedIds } = useHabits();
   const [isWriting, setIsWriting] = useState(false);
   const [newText, setNewText] = useState("");
-  const [selectedMood, setSelectedMood] = useState<JournalEntry["mood"]>("peaceful");
+  const [selectedMood, setSelectedMood] = useState<MoodValue>("steady");
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  const saveEntry = () => {
-    if (!newText.trim()) return;
-    const entry: JournalEntry = {
-      id: Date.now().toString(),
-      date: new Date(),
-      text: newText.trim(),
-      mood: selectedMood,
-    };
-    setEntries((prev) => [entry, ...prev]);
-    setNewText("");
-    setIsWriting(false);
-  };
+  const today = new Date().toISOString().split("T")[0];
 
-  const formatDate = (date: Date) => {
+  // Fetch journal entries from DB
+  const { data: entries = [], isLoading } = useQuery({
+    queryKey: ["journal", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("journal_entries")
+        .select("*")
+        .eq("user_id", user!.id)
+        .order("created_at", { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  const addEntry = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from("journal_entries").insert({
+        user_id: user!.id,
+        content: newText.trim(),
+        mood: selectedMood,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["journal"] });
+      setNewText("");
+      setIsWriting(false);
+    },
+  });
+
+  const deleteEntry = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("journal_entries")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["journal"] });
+    },
+  });
+
+  // Smart prompt based on today's habits
+  const completedHabits = habits.filter((h) => completedIds.has(h.id));
+  const missedHabits = habits.filter((h) => !completedIds.has(h.id));
+  const smartPrompt = getSmartPrompt(
+    completedHabits.length,
+    habits.length,
+    completedHabits.map((h) => h.name),
+    missedHabits.map((h) => h.name)
+  );
+
+  // Already journaled today?
+  const journaledToday = entries.some(
+    (e) => e.created_at.split("T")[0] === today
+  );
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
     const now = new Date();
-    const diff = Math.floor((now.getTime() - date.getTime()) / 86400000);
+    const diff = Math.floor(
+      (now.getTime() - date.getTime()) / 86400000
+    );
     if (diff === 0) return "today";
     if (diff === 1) return "yesterday";
     return date.toLocaleDateString("en-us", { month: "short", day: "numeric" });
   };
 
-  const formatFullDate = (date: Date) =>
-    date.toLocaleDateString("en-us", {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    });
+  const getMoodConfig = (mood: string) =>
+    moodOptions.find((m) => m.value === mood) ?? moodOptions[1];
+
+  // Mood timeline — last 7 entries
+  const moodTimeline = entries.slice(0, 7).reverse();
 
   return (
     <div className="animate-fade-in space-y-5">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold text-foreground mb-1">journal</h2>
-          <p className="text-xs text-muted-foreground">reflect on your rhythm</p>
+          <p className="text-xs text-muted-foreground">powered by your habits</p>
         </div>
-        <button
-          onClick={() => setIsWriting(!isWriting)}
-          className="p-2.5 rounded-xl bg-primary text-primary-foreground transition-all duration-300 hover:bg-primary/90"
-        >
-          <Plus className={`w-4 h-4 transition-transform duration-300 ${isWriting ? "rotate-45" : ""}`} />
-        </button>
-      </div>
-
-      {/* Mood landscape — ambient visualization */}
-      <div className="relative bg-card rounded-lg border border-border h-32 overflow-hidden">
-        {/* Background grain */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/3" />
-
-        {/* Ambient ripples based on entries */}
-        {entries.slice(0, 5).map((entry, i) => {
-          const config = moodConfig[entry.mood];
-          const x = 12 + i * 20;
-          const y = 30 + (i % 3) * 20;
-          return (
-            <div
-              key={entry.id}
-              className="absolute flex items-center justify-center"
-              style={{
-                left: `${x}%`,
-                top: `${y}%`,
-                transform: "translate(-50%, -50%)",
-              }}
-            >
-              {/* Outer glow ring */}
-              <div
-                className={`absolute w-14 h-14 rounded-full bg-gradient-to-br ${config.gradient} orb-pulse`}
-                style={{ animationDelay: `${i * 0.8}s` }}
-              />
-              {/* Inner symbol */}
-              <span
-                className="relative text-xl font-light text-foreground/70 orb-pulse"
-                style={{
-                  animationDelay: `${i * 0.8 + 0.2}s`,
-                  textShadow: "0 0 12px hsl(213 94% 78% / 0.4)",
-                }}
-              >
-                {config.icon}
-              </span>
-            </div>
-          );
-        })}
-
-        {/* No entries state */}
-        {entries.length === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <p className="text-xs text-muted-foreground/50">your reflections appear here</p>
-          </div>
+        {!isWriting && (
+          <button
+            onClick={() => setIsWriting(true)}
+            className="p-2.5 rounded-xl bg-primary text-primary-foreground transition-all duration-300 hover:bg-primary/90"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
         )}
       </div>
 
-      {/* New Entry Form */}
+      {/* Smart Prompt Card */}
+      {!isWriting && !journaledToday && habits.length > 0 && (
+        <button
+          onClick={() => setIsWriting(true)}
+          className="w-full text-left bg-gradient-to-br from-primary/10 via-card to-primary/5 rounded-lg border border-primary/20 p-5 space-y-2 transition-all hover:border-primary/40"
+        >
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-3.5 h-3.5 text-primary" />
+            <span className="text-[10px] text-primary font-medium uppercase tracking-wider">
+              today's prompt
+            </span>
+          </div>
+          <p className="text-sm font-medium text-foreground leading-relaxed">
+            {smartPrompt.prompt}
+          </p>
+          <p className="text-[10px] text-muted-foreground">{smartPrompt.subtext}</p>
+        </button>
+      )}
+
+      {/* Already journaled badge */}
+      {!isWriting && journaledToday && (
+        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-4 py-3 flex items-center gap-2">
+          <span className="text-sm">✓</span>
+          <p className="text-xs text-emerald-400 font-medium">you've journaled today — nice.</p>
+        </div>
+      )}
+
+      {/* Write Entry */}
       {isWriting && (
-        <div className="bg-card rounded-lg border border-border p-4 space-y-3 animate-fade-in">
-          <p className="text-xs text-muted-foreground font-medium">new reflection</p>
+        <div className="bg-card rounded-lg border border-border p-4 space-y-4 animate-fade-in">
+          {/* Smart prompt hint */}
+          {habits.length > 0 && (
+            <div className="flex items-start gap-2 bg-primary/5 rounded-lg p-3">
+              <Sparkles className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {smartPrompt.prompt}
+              </p>
+            </div>
+          )}
 
           {/* Mood selector */}
           <div className="flex gap-2">
-            {(Object.keys(moodConfig) as JournalEntry["mood"][]).map((mood) => {
-              const config = moodConfig[mood];
-              return (
-                <button
-                  key={mood}
-                  onClick={() => setSelectedMood(mood)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all duration-300 ${
-                    selectedMood === mood ? moodColors[mood] : "bg-muted text-muted-foreground"
-                  }`}
-                >
-                  <span className="text-sm">{config.icon}</span>
-                  {config.label}
-                </button>
-              );
-            })}
+            {moodOptions.map((mood) => (
+              <button
+                key={mood.value}
+                onClick={() => setSelectedMood(mood.value)}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs transition-all duration-300 border ${
+                  selectedMood === mood.value
+                    ? moodColor[mood.value]
+                    : "border-transparent bg-muted text-muted-foreground"
+                }`}
+              >
+                <span>{mood.icon}</span>
+                {mood.label}
+              </button>
+            ))}
           </div>
 
           <textarea
             value={newText}
             onChange={(e) => setNewText(e.target.value)}
-            placeholder="how did today feel..."
+            placeholder="write freely..."
             autoFocus
-            className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 resize-none outline-none min-h-[80px] leading-relaxed"
+            className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 resize-none outline-none min-h-[100px] leading-relaxed"
           />
-          <button
-            onClick={saveEntry}
-            disabled={!newText.trim()}
-            className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium disabled:opacity-30 transition-all duration-300"
-          >
-            save reflection
-          </button>
+
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                setIsWriting(false);
+                setNewText("");
+              }}
+              className="flex-1 py-2.5 rounded-lg bg-muted text-muted-foreground text-sm font-medium transition-all"
+            >
+              cancel
+            </button>
+            <button
+              onClick={() => addEntry.mutate()}
+              disabled={!newText.trim() || addEntry.isPending}
+              className="flex-1 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium disabled:opacity-30 transition-all duration-300"
+            >
+              {addEntry.isPending ? "saving..." : "save"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Mood Timeline */}
+      {moodTimeline.length > 1 && (
+        <div className="bg-card rounded-lg border border-border p-4 space-y-3">
+          <p className="text-xs text-muted-foreground font-medium">mood flow</p>
+          <div className="flex items-end justify-between gap-1 h-12">
+            {moodTimeline.map((entry, i) => {
+              const config = getMoodConfig(entry.mood);
+              const heights: Record<string, string> = {
+                on_fire: "h-12",
+                steady: "h-9",
+                meh: "h-6",
+                rough: "h-3",
+              };
+              return (
+                <div key={entry.id} className="flex-1 flex flex-col items-center gap-1">
+                  <span className="text-xs">{config.icon}</span>
+                  <div
+                    className={`w-full rounded-t-sm ${heights[entry.mood] ?? "h-6"} transition-all duration-500`}
+                    style={{
+                      background: `hsl(var(--primary) / ${0.15 + i * 0.1})`,
+                    }}
+                  />
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 
       {/* Past Entries */}
-      <div className="space-y-2">
-        <p className="text-xs text-muted-foreground font-medium">past reflections</p>
-        {entries.map((entry) => {
-          const config = moodConfig[entry.mood];
-          return (
-            <button
-              key={entry.id}
-              onClick={() => setExpandedId(expandedId === entry.id ? null : entry.id)}
-              className="w-full text-left bg-card rounded-lg border border-border p-4 transition-all duration-300 hover:border-primary/30"
-            >
-              <div className="flex items-center justify-between mb-1">
-                <div className="flex items-center gap-2">
-                  <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${moodColors[entry.mood]} ${config.glow}`}>
-                    {config.icon}
-                  </span>
-                  <span className="text-xs text-muted-foreground">{formatDate(entry.date)}</span>
-                </div>
-                {expandedId === entry.id ? (
-                  <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" />
-                ) : (
-                  <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
-                )}
+      {isLoading ? (
+        <div className="flex justify-center py-8">
+          <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        </div>
+      ) : entries.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-sm text-muted-foreground">no entries yet. tap + to start.</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <p className="text-xs text-muted-foreground font-medium">entries</p>
+          {entries.map((entry) => {
+            const config = getMoodConfig(entry.mood);
+            const isExpanded = expandedId === entry.id;
+            return (
+              <div
+                key={entry.id}
+                className="group relative bg-card rounded-lg border border-border transition-all duration-300 hover:border-primary/30"
+              >
+                <button
+                  onClick={() =>
+                    setExpandedId(isExpanded ? null : entry.id)
+                  }
+                  className="w-full text-left p-4"
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm">{config.icon}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {formatDate(entry.created_at)}
+                      </span>
+                    </div>
+                    {isExpanded ? (
+                      <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" />
+                    ) : (
+                      <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+                    )}
+                  </div>
+                  {isExpanded ? (
+                    <p className="text-sm text-foreground leading-relaxed animate-fade-in">
+                      {entry.content}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-foreground/70 truncate">
+                      {entry.content}
+                    </p>
+                  )}
+                </button>
+                {/* Delete */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteEntry.mutate(entry.id);
+                  }}
+                  className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 p-1.5 text-muted-foreground hover:text-destructive transition-all"
+                >
+                  <Trash2 className="w-3 h-3" />
+                </button>
               </div>
-              {expandedId === entry.id ? (
-                <div className="animate-fade-in">
-                  <p className="text-[10px] text-muted-foreground mb-2">{formatFullDate(entry.date)}</p>
-                  <p className="text-sm text-foreground leading-relaxed">{entry.text}</p>
-                </div>
-              ) : (
-                <p className="text-sm text-foreground/70 truncate">{entry.text}</p>
-              )}
-            </button>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };
