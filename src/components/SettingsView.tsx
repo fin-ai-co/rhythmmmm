@@ -1,4 +1,5 @@
 import { useState } from "react";
+import SubscriptionPaywall from "@/components/SubscriptionPaywall";
 import {
   User,
   Bell,
