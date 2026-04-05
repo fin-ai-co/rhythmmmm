@@ -1,16 +1,97 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState, useCallback } from "react";
+import FocusOrb from "@/components/FocusOrb";
+import ProgressRing from "@/components/ProgressRing";
+import HabitRow from "@/components/HabitRow";
+import GoalCard from "@/components/GoalCard";
+import BottomNav from "@/components/BottomNav";
+import AnalyticsView from "@/components/AnalyticsView";
+import GuideView from "@/components/GuideView";
+import JournalView from "@/components/JournalView";
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+type Tab = "home" | "analytics" | "guide" | "journal";
+
+interface Habit {
+  id: string;
+  name: string;
+  streak: number;
+  friction: "low" | "medium" | "heavy";
+  completed: boolean;
+}
+
+const initialHabits: Habit[] = [
+  { id: "1", name: "meditate 10 min", streak: 12, friction: "low", completed: false },
+  { id: "2", name: "exercise", streak: 5, friction: "heavy", completed: false },
+  { id: "3", name: "read 20 pages", streak: 8, friction: "medium", completed: false },
+  { id: "4", name: "no coffee", streak: 26, friction: "heavy", completed: false },
+  { id: "5", name: "journal", streak: 15, friction: "low", completed: false },
+];
+
+const Index = () => {
+  const [activeTab, setActiveTab] = useState<Tab>("home");
+  const [habits, setHabits] = useState<Habit[]>(initialHabits);
+
+  const completedCount = habits.filter((h) => h.completed).length;
+  const progress = habits.length > 0 ? completedCount / habits.length : 0;
+
+  const completeHabit = useCallback((id: string) => {
+    setHabits((prev) =>
+      prev.map((h) => (h.id === id ? { ...h, completed: true } : h))
+    );
+  }, []);
+
+  const today = new Date().toLocaleDateString("en-us", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
+    <div className="min-h-screen bg-background">
+      <div className="max-w-md mx-auto px-5 pt-12 pb-28">
+        {/* Header */}
+        <div className="mb-2 animate-fade-in">
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">discipline.</h1>
+          <p className="text-xs text-muted-foreground mt-1">{today}</p>
+        </div>
+
+        {activeTab === "home" && (
+          <div className="animate-fade-in space-y-5">
+            {/* Orb + Progress */}
+            <div className="flex items-center justify-between">
+              <FocusOrb progress={progress} />
+              <ProgressRing progress={progress} />
+            </div>
+
+            {/* Goal */}
+            <GoalCard title="86% through no-coffee month" progress={86} />
+
+            {/* Habits */}
+            <div>
+              <p className="text-xs text-muted-foreground mb-3 font-medium">today's habits</p>
+              <div className="space-y-2">
+                {habits.map((habit) => (
+                  <HabitRow
+                    key={habit.id}
+                    name={habit.name}
+                    streak={habit.streak}
+                    friction={habit.friction}
+                    completed={habit.completed}
+                    onComplete={() => completeHabit(habit.id)}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "analytics" && <AnalyticsView />}
+        {activeTab === "guide" && <GuideView />}
+        {activeTab === "journal" && <JournalView />}
+      </div>
+
+      <BottomNav active={activeTab} onChange={setActiveTab} />
     </div>
   );
 };
-
-const Index = PlaceholderIndex;
 
 export default Index;
