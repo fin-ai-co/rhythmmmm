@@ -1,5 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { initializePurchases } from "@/services/purchases";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -36,6 +37,13 @@ const AppRoutes = () => {
   const { loading } = useAuth();
   const [splashDone, setSplashDone] = useState(false);
   const handleSplashFinish = useCallback(() => setSplashDone(true), []);
+
+  // Initialize Apple In-App Purchases when app starts
+  useEffect(() => {
+    initializePurchases().catch((err) =>
+      console.warn("[IAP] Init failed:", err)
+    );
+  }, []);
 
   if (!splashDone || loading) {
     return <SplashScreen onFinish={handleSplashFinish} />;
