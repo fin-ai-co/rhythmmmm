@@ -29,6 +29,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<Tab>("home");
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showAddHabit, setShowAddHabit] = useState(false);
+  useStreakUpdater();
 
   // Detect first-time user (no habits yet, just signed up)
   useEffect(() => {
