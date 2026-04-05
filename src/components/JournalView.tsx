@@ -106,9 +106,17 @@ const JournalView = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["journal"] });
+      queryClient.invalidateQueries({ queryKey: ["journal", user?.id] });
       setNewText("");
       setIsWriting(false);
+    },
+    onError: (error) => {
+      console.error("Journal save error:", error);
+      toast({
+        title: "couldn't save entry",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 
