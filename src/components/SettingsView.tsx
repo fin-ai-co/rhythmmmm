@@ -72,7 +72,7 @@ const SettingsView = () => {
       <div className="bg-card rounded-lg border border-border divide-y divide-border">
         <SettingLink icon={Shield} label="privacy policy" />
         <SettingLink icon={HelpCircle} label="help & support" />
-        <SettingLink icon={LogOut} label="sign out" destructive />
+        <SettingLink icon={LogOut} label="sign out" destructive onClick={signOut} />
       </div>
 
       <p className="text-[10px] text-muted-foreground text-center pt-2">
