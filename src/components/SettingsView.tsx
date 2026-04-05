@@ -280,6 +280,16 @@ const SettingsView = () => {
         </div>
       )}
 
+      {/* Upgrade Paywall */}
+      {showUpgrade && (
+        <SubscriptionPaywall
+          trialDaysLeft={trialDaysLeft}
+          isTrialExpired={!hasAccess}
+          forceLock={false}
+          onDismiss={() => setShowUpgrade(false)}
+        />
+      )}
+
       <p className="text-[10px] text-muted-foreground text-center pt-2">
         discipline. v1.0.0
       </p>
