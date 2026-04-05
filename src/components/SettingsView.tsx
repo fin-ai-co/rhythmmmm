@@ -24,7 +24,7 @@ import { toast } from "@/hooks/use-toast";
 const SettingsView = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
-  const { isPremium, status, FREE_HABIT_LIMIT } = useSubscription();
+  const { isPremium, isTrialActive, trialDaysLeft, hasAccess } = useSubscription();
   const { habits } = useHabits();
   const [notifications, setNotifications] = useState(true);
   const [haptics, setHaptics] = useState(true);

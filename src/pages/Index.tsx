@@ -25,7 +25,7 @@ type Tab = "home" | "analytics" | "rituals" | "guide" | "journal" | "settings";
 const Index = () => {
   const { user } = useAuth();
   const { habits, completedIds, isLoading, completeHabit, addHabit, deleteHabit } = useHabits();
-  const { isPremium, canAddHabit, FREE_HABIT_LIMIT } = useSubscription();
+  const { hasAccess, isPremium, isTrialActive, isTrialExpired, isExpired, trialDaysLeft, isLoading: subLoading } = useSubscription();
   const [activeTab, setActiveTab] = useState<Tab>("home");
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showAddHabit, setShowAddHabit] = useState(false);
