@@ -34,6 +34,7 @@ const SettingsView = () => {
   const [showSupport, setShowSupport] = useState(false);
   const [supportSubject, setSupportSubject] = useState("");
   const [supportMessage, setSupportMessage] = useState("");
+  const [showUpgrade, setShowUpgrade] = useState(false);
 
   const handleResetStreaks = async () => {
     if (!resetConfirm) {
