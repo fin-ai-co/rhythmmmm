@@ -1,7 +1,6 @@
 import { useState } from "react";
 import SubscriptionPaywall from "@/components/SubscriptionPaywall";
 import {
-  User,
   Bell,
   Clock,
   Vibrate,
@@ -14,19 +13,38 @@ import {
   Download,
   Send,
   X,
+  Sun,
+  Moon,
+  Palette,
+  Pencil,
+  Check,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useHabits } from "@/hooks/useHabits";
+import { useProfile } from "@/hooks/useProfile";
+import { useTheme } from "@/hooks/useTheme";
+import type { ColorTheme } from "@/hooks/useTheme";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+
+const COLOR_THEMES: { value: ColorTheme; label: string; hsl: string }[] = [
+  { value: "blue", label: "blue", hsl: "213 94% 60%" },
+  { value: "purple", label: "purple", hsl: "270 70% 60%" },
+  { value: "green", label: "green", hsl: "152 60% 45%" },
+  { value: "orange", label: "orange", hsl: "25 95% 55%" },
+  { value: "rose", label: "rose", hsl: "350 80% 55%" },
+];
 
 const SettingsView = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { isPremium, isTrialActive, trialDaysLeft, hasAccess } = useSubscription();
   const { habits } = useHabits();
+  const { displayName, initial, updateName } = useProfile();
+  const { mode, colorTheme, setMode, setColorTheme } = useTheme();
+
   const [notifications, setNotifications] = useState(true);
   const [haptics, setHaptics] = useState(true);
   const [holdDuration, setHoldDuration] = useState("600");
@@ -35,6 +53,18 @@ const SettingsView = () => {
   const [supportSubject, setSupportSubject] = useState("");
   const [supportMessage, setSupportMessage] = useState("");
   const [showUpgrade, setShowUpgrade] = useState(false);
+  const [editingName, setEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState(displayName ?? "");
+
+  const handleSaveName = async () => {
+    const error = await updateName(nameInput);
+    if (error) {
+      toast({ title: "error", description: "couldn't update name", variant: "destructive" });
+    } else {
+      toast({ title: "saved", description: "display name updated" });
+    }
+    setEditingName(false);
+  };
 
   const handleResetStreaks = async () => {
     if (!resetConfirm) {
@@ -109,13 +139,47 @@ const SettingsView = () => {
         <p className="text-xs text-muted-foreground">customize your experience</p>
       </div>
 
-      {/* Profile + Plan */}
+      {/* Profile */}
       <div className="bg-card rounded-lg border border-border p-4 flex items-center gap-4">
         <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-          <User className="w-5 h-5 text-primary" />
+          <span className="text-lg font-bold text-primary">{initial}</span>
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-foreground truncate">{user?.email ?? "anonymous"}</p>
+          {editingName ? (
+            <div className="flex items-center gap-2">
+              <input
+                value={nameInput}
+                onChange={(e) => setNameInput(e.target.value)}
+                placeholder="your name"
+                autoFocus
+                className="flex-1 bg-muted rounded-lg px-2.5 py-1.5 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none"
+                onKeyDown={(e) => e.key === "Enter" && handleSaveName()}
+              />
+              <button onClick={handleSaveName} className="p-1.5 text-primary hover:text-primary/80">
+                <Check className="w-4 h-4" />
+              </button>
+              <button onClick={() => setEditingName(false)} className="p-1.5 text-muted-foreground hover:text-foreground">
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-foreground truncate">
+                  {displayName || (user?.email ?? "anonymous")}
+                </p>
+                {displayName && (
+                  <p className="text-[10px] text-muted-foreground truncate">{user?.email}</p>
+                )}
+              </div>
+              <button
+                onClick={() => { setNameInput(displayName ?? ""); setEditingName(true); }}
+                className="p-1 text-muted-foreground hover:text-foreground shrink-0"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
           <div className="flex items-center gap-1.5 mt-0.5">
             {isPremium ? (
               <>
@@ -135,14 +199,72 @@ const SettingsView = () => {
         </div>
       </div>
 
-      {/* Upgrade button */}
-      <button
-        onClick={() => setShowUpgrade(true)}
-        className="w-full py-3.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold flex items-center justify-center gap-2 hover:bg-primary/90 transition-all"
-      >
-        <Crown className="w-4 h-4" />
-        upgrade
-      </button>
+      {/* Upgrade — only if not premium */}
+      {!isPremium && (
+        <button
+          onClick={() => setShowUpgrade(true)}
+          className="w-full py-3.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold flex items-center justify-center gap-2 hover:bg-primary/90 transition-all"
+        >
+          <Crown className="w-4 h-4" />
+          upgrade
+        </button>
+      )}
+
+      {/* Appearance */}
+      <div className="space-y-1">
+        <p className="text-xs text-muted-foreground font-medium px-1 mb-2">appearance</p>
+        <div className="bg-card rounded-lg border border-border p-4 space-y-4">
+          {/* Dark/Light toggle */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {mode === "dark" ? (
+                <Moon className="w-4 h-4 text-muted-foreground" />
+              ) : (
+                <Sun className="w-4 h-4 text-muted-foreground" />
+              )}
+              <div>
+                <p className="text-sm text-foreground">mode</p>
+                <p className="text-[10px] text-muted-foreground">{mode}</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setMode(mode === "dark" ? "light" : "dark")}
+              className={`w-10 h-6 rounded-full transition-all duration-300 relative ${
+                mode === "dark" ? "bg-primary" : "bg-muted"
+              }`}
+            >
+              <div
+                className={`absolute top-1 w-4 h-4 rounded-full bg-background shadow transition-transform duration-300 ${
+                  mode === "dark" ? "translate-x-5" : "translate-x-1"
+                }`}
+              />
+            </button>
+          </div>
+
+          {/* Color theme */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <Palette className="w-3.5 h-3.5 text-muted-foreground" />
+              <p className="text-xs text-muted-foreground">accent color</p>
+            </div>
+            <div className="flex gap-3">
+              {COLOR_THEMES.map((t) => (
+                <button
+                  key={t.value}
+                  onClick={() => setColorTheme(t.value)}
+                  className={`w-8 h-8 rounded-full transition-all duration-200 ${
+                    colorTheme === t.value
+                      ? "ring-2 ring-offset-2 ring-offset-background ring-foreground scale-110"
+                      : "hover:scale-105"
+                  }`}
+                  style={{ backgroundColor: `hsl(${t.hsl})` }}
+                  title={t.label}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Notifications & Haptics */}
       <div className="space-y-1">
