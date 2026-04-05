@@ -50,7 +50,7 @@ const HabitRow = ({ name, streak, friction, completed, onComplete }: HabitRowPro
 
   return (
     <div
-      className={`relative overflow-hidden rounded-lg p-4 select-none cursor-pointer transition-all duration-300 border border-transparent hover:border-primary/20 hover:bg-card/80 hover:shadow-[0_0_16px_hsl(213_94%_78%/0.06)] ${
+      className={`relative overflow-hidden rounded-lg p-4 select-none cursor-pointer transition-all duration-300 border border-transparent hover:border-primary/30 hover:bg-primary/5 hover:shadow-[0_0_20px_hsl(213_94%_78%/0.12)] ${
         completed ? "bg-primary/10" : "bg-card"
       }`}
       onMouseDown={startHold}
