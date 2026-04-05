@@ -14,6 +14,7 @@ import SettingsView from "@/components/SettingsView";
 import RitualsView from "@/components/RitualsView";
 import OnboardingView from "@/components/OnboardingView";
 import AddHabitDialog from "@/components/AddHabitDialog";
+import SubscriptionPaywall from "@/components/SubscriptionPaywall";
 import { useHabits } from "@/hooks/useHabits";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useStreakUpdater } from "@/hooks/useStreakUpdater";
@@ -29,6 +30,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<Tab>("home");
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showAddHabit, setShowAddHabit] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
   useStreakUpdater();
 
   // Detect first-time user (no habits yet, just signed up)
