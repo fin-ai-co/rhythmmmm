@@ -1,4 +1,9 @@
-import { Crown, X, Check } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Crown, X, Check, RotateCcw } from "lucide-react";
+import { purchasePlan, getLocalizedPrice, restorePurchases } from "@/services/purchases";
+import { toast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SubscriptionPaywallProps {
   trialDaysLeft?: number;
@@ -7,18 +12,18 @@ interface SubscriptionPaywallProps {
   forceLock?: boolean;
 }
 
-const plans = [
+const planDefaults = [
   {
-    id: "monthly",
+    id: "monthly" as const,
     name: "monthly",
-    price: "$4.99",
+    fallbackPrice: "$4.99",
     period: "/mo",
     description: "billed monthly, cancel anytime",
   },
   {
-    id: "yearly",
+    id: "yearly" as const,
     name: "yearly",
-    price: "$49.99",
+    fallbackPrice: "$49.99",
     period: "/yr",
     badge: "save 17%",
     description: "billed annually",
@@ -35,10 +40,51 @@ const features = [
 ];
 
 const SubscriptionPaywall = ({ trialDaysLeft = 0, isTrialExpired = false, onDismiss, forceLock = false }: SubscriptionPaywallProps) => {
-  const handleSubscribe = (planId: string) => {
-    // In a real app this would open Stripe/IAP
-    // For now show a message
-    alert(`Subscription to ${planId} plan — payment integration coming soon`);
+  const [loading, setLoading] = useState<string | null>(null);
+  const [restoring, setRestoring] = useState(false);
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  // Build plans with localized prices from Apple (falls back to hardcoded)
+  const plans = planDefaults.map((p) => ({
+    ...p,
+    price: getLocalizedPrice(p.id) ?? p.fallbackPrice,
+  }));
+
+  const handleSubscribe = async (planId: "monthly" | "yearly") => {
+    setLoading(planId);
+    try {
+      await purchasePlan(planId);
+      // After successful purchase + receipt validation, refresh subscription
+      await queryClient.invalidateQueries({ queryKey: ["subscription", user?.id] });
+      toast({ title: "welcome to premium!", description: "your subscription is now active." });
+      onDismiss?.();
+    } catch (err: any) {
+      toast({
+        title: "purchase failed",
+        description: err.message || "something went wrong",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const handleRestore = async () => {
+    setRestoring(true);
+    try {
+      await restorePurchases();
+      await queryClient.invalidateQueries({ queryKey: ["subscription", user?.id] });
+      toast({ title: "purchases restored", description: "checking your subscription status..." });
+    } catch (err: any) {
+      toast({
+        title: "restore failed",
+        description: err.message || "could not restore purchases",
+        variant: "destructive",
+      });
+    } finally {
+      setRestoring(false);
+    }
   };
 
   return (
@@ -93,7 +139,8 @@ const SubscriptionPaywall = ({ trialDaysLeft = 0, isTrialExpired = false, onDism
             <button
               key={plan.id}
               onClick={() => handleSubscribe(plan.id)}
-              className="w-full bg-card border border-border rounded-lg p-4 flex items-center justify-between hover:border-primary/50 transition-all duration-300 group"
+              disabled={loading !== null}
+              className="w-full bg-card border border-border rounded-lg p-4 flex items-center justify-between hover:border-primary/50 transition-all duration-300 group disabled:opacity-50"
             >
               <div className="text-left">
                 <div className="flex items-center gap-2">
@@ -107,12 +154,28 @@ const SubscriptionPaywall = ({ trialDaysLeft = 0, isTrialExpired = false, onDism
                 <span className="text-[10px] text-muted-foreground">{plan.description}</span>
               </div>
               <div className="text-right">
-                <span className="text-lg font-bold text-foreground">{plan.price}</span>
-                <span className="text-xs text-muted-foreground">{plan.period}</span>
+                {loading === plan.id ? (
+                  <span className="text-sm text-muted-foreground">loading...</span>
+                ) : (
+                  <>
+                    <span className="text-lg font-bold text-foreground">{plan.price}</span>
+                    <span className="text-xs text-muted-foreground">{plan.period}</span>
+                  </>
+                )}
               </div>
             </button>
           ))}
         </div>
+
+        {/* Restore purchases */}
+        <button
+          onClick={handleRestore}
+          disabled={restoring}
+          className="w-full flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors py-2 disabled:opacity-50"
+        >
+          <RotateCcw className="w-3.5 h-3.5" />
+          {restoring ? "restoring..." : "restore purchases"}
+        </button>
 
         {isTrialExpired && (
           <p className="text-[10px] text-muted-foreground text-center">
