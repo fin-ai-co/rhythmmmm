@@ -285,10 +285,10 @@ const JournalView = () => {
             {moodTimeline.map((entry, i) => {
               const config = getMoodConfig(entry.mood);
               const heights: Record<string, string> = {
-                on_fire: "h-12",
-                steady: "h-9",
-                meh: "h-6",
-                rough: "h-3",
+                energized: "h-12",
+                focused: "h-9",
+                peaceful: "h-6",
+                struggling: "h-3",
               };
               return (
                 <div key={entry.id} className="flex-1 flex flex-col items-center gap-1">
