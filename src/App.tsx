@@ -10,13 +10,14 @@ import Index from "./pages/Index.tsx";
 import Login from "./pages/Login.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Privacy from "./pages/Privacy.tsx";
+import Landing from "./pages/Landing.tsx";
 
 const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { session, loading } = useAuth();
 
-  if (loading) return null; // splash covers this
+  if (loading) return null;
 
   if (!session) return <Navigate to="/login" replace />;
   return <>{children}</>;
@@ -27,7 +28,7 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 
   if (loading) return null;
 
-  if (session) return <Navigate to="/" replace />;
+  if (session) return <Navigate to="/app" replace />;
   return <>{children}</>;
 };
 
@@ -42,8 +43,9 @@ const AppRoutes = () => {
 
   return (
     <Routes>
+      <Route path="/" element={<Landing />} />
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-      <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+      <Route path="/app" element={<ProtectedRoute><Index /></ProtectedRoute>} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
