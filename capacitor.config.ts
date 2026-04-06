@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.78de443f494d4abcaad500d5b8e9c8f5',
+  appId: 'com.rhythm.app',
   appName: 'rhythm-app-2026',
   webDir: 'dist',
   server: {
